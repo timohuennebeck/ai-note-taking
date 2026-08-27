@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS themes (
   id            INTEGER PRIMARY KEY,
   name          TEXT NOT NULL UNIQUE,
   description   TEXT,
+  -- legacy, unused: kept so existing databases keep opening
   emoji         TEXT,
   created_at    TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
@@ -113,7 +114,6 @@ interface ThemeRow {
   id: number
   name: string
   description: string | null
-  emoji: string | null
   created_at: string
   updated_at: string
   doc_count?: number
@@ -167,7 +167,6 @@ const toTheme = (r: ThemeRow): Theme => ({
   id: r.id,
   name: r.name,
   description: r.description,
-  emoji: r.emoji,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
   docCount: r.doc_count ?? 0
@@ -219,6 +218,29 @@ export class LitterDb {
     this.db.pragma('journal_mode = WAL')
     this.db.pragma('foreign_keys = ON')
     this.db.exec(SCHEMA)
+    this.stripEmojiFromThemeNames()
+  }
+
+  /**
+   * Theme names are plain text. Older versions let an emoji slip into the
+   * name itself, so trim any leading pictographs once on open. A rename that
+   * would collide with an existing theme is left alone.
+   */
+  private stripEmojiFromThemeNames(): void {
+    const leading = /^[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D\s]+/u
+    const rows = this.db.prepare('SELECT id, name FROM themes').all() as Array<{
+      id: number
+      name: string
+    }>
+    for (const r of rows) {
+      const cleaned = r.name.replace(leading, '').trim()
+      if (!cleaned || cleaned === r.name) continue
+      try {
+        this.db.prepare('UPDATE themes SET name = ? WHERE id = ?').run(cleaned, r.id)
+      } catch {
+        // a theme with the cleaned name already exists — keep this one as is
+      }
+    }
   }
 
   close(): void {
@@ -289,12 +311,12 @@ export class LitterDb {
     return r ? toTheme(r) : null
   }
 
-  createTheme(name: string, description?: string | null, emoji?: string | null): Theme {
+  createTheme(name: string, description?: string | null): Theme {
     const existing = this.getThemeByName(name)
     if (existing) return existing
     const id = this.db
-      .prepare('INSERT INTO themes (name, description, emoji) VALUES (?, ?, ?)')
-      .run(name, description ?? null, emoji ?? null).lastInsertRowid as number
+      .prepare('INSERT INTO themes (name, description) VALUES (?, ?)')
+      .run(name, description ?? null).lastInsertRowid as number
     return this.getTheme(id)!
   }
 

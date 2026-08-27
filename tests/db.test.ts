@@ -1,3 +1,6 @@
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { LitterDb } from '../src/main/db'
 import { buildFeed, buildThread } from '../src/main/feed'
@@ -16,6 +19,26 @@ describe('LitterDb', () => {
     expect(db.getDump(dump.id)?.status).toBe('processed')
     expect(db.getDump(dump.id)?.processedAt).toBeTruthy()
     expect(db.getDump(dump.id)?.content).toBe('Zahnarzt anrufen wegen Milo')
+  })
+
+  it('strips emoji that ended up in theme names on open', () => {
+    const file = path.join(os.tmpdir(), `litter-emoji-${process.pid}.sqlite3`)
+    for (const suffix of ['', '-wal', '-shm']) {
+      try { fs.unlinkSync(file + suffix) } catch { /* not there */ }
+    }
+    const first = new LitterDb(file)
+    first.db.prepare("INSERT INTO themes (name) VALUES ('🗂️ EmaBoard')").run()
+    first.db.prepare("INSERT INTO themes (name) VALUES ('✈️  Lissabon')").run()
+    first.db.prepare("INSERT INTO themes (name) VALUES ('Familie')").run()
+    first.close()
+
+    // reopening runs the migration
+    const second = new LitterDb(file)
+    expect(second.listThemes().map((t) => t.name)).toEqual(['EmaBoard', 'Familie', 'Lissabon'])
+    second.close()
+    for (const suffix of ['', '-wal', '-shm']) {
+      try { fs.unlinkSync(file + suffix) } catch { /* not there */ }
+    }
   })
 
   it('creates themes idempotently by name', () => {

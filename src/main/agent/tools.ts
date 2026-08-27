@@ -41,7 +41,7 @@ export function buildKeplerTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
           themes
             .map(
               (t) =>
-                `- [id ${t.id}] ${t.name}${t.emoji ? ` ${t.emoji}` : ''} (${t.docCount} Dokumente)${t.description ? ` — ${t.description}` : ''}`
+                `- [id ${t.id}] ${t.name} (${t.docCount} Dokumente)${t.description ? ` — ${t.description}` : ''}`
             )
             .join('\n')
         )
@@ -52,12 +52,11 @@ export function buildKeplerTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
       'create_theme',
       'Legt ein neues Thema an. description ist deine eigene Ablage-Regel für dieses Thema.',
       {
-        name: z.string().describe('Kurzer Themenname, z. B. "Finanzen"'),
-        description: z.string().describe('Wann gehört etwas in dieses Thema?'),
-        emoji: z.string().optional().describe('Ein passendes Emoji')
+        name: z.string().describe('Kurzer Themenname ohne Emoji, z. B. "Finanzen"'),
+        description: z.string().describe('Wann gehört etwas in dieses Thema?')
       },
-      async ({ name, description, emoji }) => {
-        const t = ctx.db.createTheme(name, description, emoji ?? null)
+      async ({ name, description }) => {
+        const t = ctx.db.createTheme(name, description)
         ctx.db.updateTheme(t.id, { description })
         changed()
         return text(`Thema "${t.name}" angelegt (id ${t.id}).`)

@@ -14,7 +14,6 @@ export interface Theme {
   id: number
   name: string
   description: string | null
-  emoji: string | null
   createdAt: string
   updatedAt: string
   /** filled by list queries */

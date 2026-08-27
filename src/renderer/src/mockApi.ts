@@ -15,11 +15,11 @@ import type {
  */
 
 const themes: Theme[] = [
-  { id: 1, name: 'Familie', description: 'Termine, Kinder, Zuhause', emoji: '🏠', createdAt: '', updatedAt: '', docCount: 2 },
-  { id: 2, name: 'Finanzen', description: 'Preise, Verträge, Budget', emoji: '💶', createdAt: '', updatedAt: '', docCount: 1 },
-  { id: 3, name: 'EmaBoard', description: 'Produktarbeit: Features, Sprints, Feedback', emoji: '🗂️', createdAt: '', updatedAt: '', docCount: 4 },
-  { id: 4, name: 'Credentials', description: 'Kurse, Zertifikate, Lernen', emoji: '🎓', createdAt: '', updatedAt: '', docCount: 1 },
-  { id: 5, name: 'Lissabon', description: 'Reise im September: Flüge, Hotel, Ideen', emoji: '✈️', createdAt: '', updatedAt: '', docCount: 1 }
+  { id: 1, name: 'Familie', description: 'Termine, Kinder, Zuhause', createdAt: '', updatedAt: '', docCount: 2 },
+  { id: 2, name: 'Finanzen', description: 'Preise, Verträge, Budget', createdAt: '', updatedAt: '', docCount: 1 },
+  { id: 3, name: 'EmaBoard', description: 'Produktarbeit: Features, Sprints, Feedback', createdAt: '', updatedAt: '', docCount: 4 },
+  { id: 4, name: 'Credentials', description: 'Kurse, Zertifikate, Lernen', createdAt: '', updatedAt: '', docCount: 1 },
+  { id: 5, name: 'Lissabon', description: 'Reise im September: Flüge, Hotel, Ideen', createdAt: '', updatedAt: '', docCount: 1 }
 ]
 
 const now = new Date()

@@ -26,10 +26,7 @@ export function Themen(): ReactElement {
           >
             <Icon name="folder-open" size={16} style={{ color: 'var(--muted)' }} />
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <span style={{ fontSize: 13.5, fontWeight: 500 }}>
-                {t.emoji ? `${t.emoji} ` : ''}
-                {t.name}
-              </span>
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{t.name}</span>
               <span style={{ fontSize: 11.5, color: 'var(--faint)' }}>
                 {t.docCount === 1 ? '1 Dokument' : `${t.docCount} Dokumente`}
                 {t.description ? ` · ${t.description}` : ''}
