@@ -20,16 +20,12 @@ const api: LitterApi = {
   getSessionForDump: (dumpId) => invoke('session:forDump', dumpId),
 
   listThemes: () => invoke('themes:list'),
-  createTheme: (name) => invoke('themes:create', name),
-  renameTheme: (id, name) => invoke('themes:rename', id, name),
-  deleteTheme: (id) => invoke('themes:delete', id),
 
   listDocs: (themeId) => invoke('docs:list', themeId),
   getDoc: (id) => invoke('docs:get', id),
   updateDoc: (id, patch) => invoke('docs:update', id, patch),
   deleteDoc: (id) => invoke('docs:delete', id),
   setDocTheme: (id, themeId) => invoke('docs:setTheme', id, themeId),
-  createDoc: (title) => invoke('docs:create', title),
 
   listTodos: () => invoke('todos:list'),
   toggleTodo: (id, done) => invoke('todos:toggle', id, done),

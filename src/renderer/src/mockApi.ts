@@ -355,19 +355,6 @@ export const mockApi: LitterApi = {
   async listThemes() {
     return themes.map((t) => ({ ...t, docCount: docs.filter((d) => d.themeId === t.id).length }))
   },
-  async createTheme(name) {
-    const t: Theme = { id: nextId++, name, description: null, emoji: null, createdAt: '', updatedAt: '', docCount: 0 }
-    themes.push(t)
-    return t
-  },
-  async renameTheme(id, name) {
-    const t = themes.find((x) => x.id === id)
-    if (t) t.name = name
-  },
-  async deleteTheme(id) {
-    const i = themes.findIndex((x) => x.id === id)
-    if (i >= 0) themes.splice(i, 1)
-  },
   async listDocs(themeId) {
     return themeId == null ? docs : docs.filter((d) => d.themeId === themeId)
   },
@@ -388,20 +375,6 @@ export const mockApi: LitterApi = {
       d.themeId = themeId
       d.themeName = themes.find((t) => t.id === themeId)?.name ?? null
     }
-  },
-  async createDoc(title) {
-    const d: Doc = {
-      id: nextId++,
-      dumpId: null,
-      themeId: null,
-      themeName: null,
-      title,
-      content: '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    docs.unshift(d)
-    return d
   },
   async listTodos() {
     return todos

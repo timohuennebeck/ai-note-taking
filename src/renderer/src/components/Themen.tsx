@@ -1,11 +1,10 @@
-import { useState, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { Icon } from '../icons'
-import { api, useStore } from '../state'
+import { useStore } from '../state'
 import { dayLabel } from '@shared/blocks'
 
 export function Themen(): ReactElement {
-  const { themes, go, refresh } = useStore()
-  const [adding, setAdding] = useState(false)
+  const { themes, go } = useStore()
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: '4px 14px 20px', overflowY: 'auto' }}>
@@ -41,51 +40,10 @@ export function Themen(): ReactElement {
             </span>
           </div>
         ))}
-        <div
-          className="hover-ink"
-          onClick={() => setAdding(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            height: 40,
-            padding: '0 12px',
-            borderRadius: 9,
-            cursor: 'pointer',
-            color: 'var(--faint)'
-          }}
-        >
-          <Icon name="plus" size={14} />
-          <span style={{ fontSize: 12.5 }}>Thema anlegen</span>
-        </div>
-        {adding && (
-          <input
-            autoFocus
-            placeholder="Themenname"
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') setAdding(false)
-              if (e.key === 'Enter') {
-                const name = (e.target as HTMLInputElement).value.trim()
-                if (name) {
-                  void api.createTheme(name).then(() => {
-                    refresh()
-                    setAdding(false)
-                  })
-                }
-              }
-            }}
-            style={{
-              height: 32,
-              margin: '2px 12px',
-              padding: '0 10px',
-              borderRadius: 7,
-              border: 'none',
-              outline: 'none',
-              boxShadow: 'inset 0 0 0 1.5px var(--accent)',
-              background: 'var(--card)',
-              fontSize: 13
-            }}
-          />
+        {themes.length === 0 && (
+          <div style={{ fontSize: 12.5, color: 'var(--faint)', textAlign: 'center', marginTop: 40 }}>
+            Noch keine Themen — Kepler legt sie an, sobald du etwas ablegst.
+          </div>
         )}
       </div>
     </div>

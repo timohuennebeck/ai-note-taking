@@ -161,7 +161,7 @@ function AskResult(): ReactElement | null {
               {uniqueSources.map((s, i) => (
                 <span
                   key={i}
-                  className="hover-bg2"
+                  className="litter-chip litter-chip-click"
                   onClick={() =>
                     go({
                       view: 'note',
@@ -276,7 +276,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
                 {p.kind === 'doc' ? (
                   <>
                     <span
-                      className="hover-bg2"
+                      className="litter-chip litter-chip-click"
                       onClick={(e) => {
                         e.stopPropagation()
                         if (p.noteId != null) go({ view: 'note', noteId: p.noteId })
@@ -290,7 +290,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
                       <>
                         <span style={{ fontSize: 11.5, color: 'var(--ghost)', flex: 'none' }}>in</span>
                         <span
-                          className="hover-bg2"
+                          className="litter-chip litter-chip-click"
                           onClick={(e) => {
                             e.stopPropagation()
                             setMenuFor(menuFor === pi ? null : pi)
@@ -328,7 +328,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
                     )}
                   </>
                 ) : (
-                  <span onClick={(e) => e.stopPropagation()} style={{ ...chipCore, cursor: 'default' }}>
+                  <span className="litter-chip" onClick={(e) => e.stopPropagation()} style={{ ...chipCore, cursor: 'default' }}>
                     <span
                       style={{
                         width: 11,
@@ -412,7 +412,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
             style={{ ...menuItem, color: 'var(--accent)' }}
           >
             <Icon name="trash" size={12} />
-            <span style={{ flex: 1 }}>Aus Verlauf löschen</span>
+            <span style={{ flex: 1 }}>Eintrag löschen</span>
           </div>
         </div>
       )}

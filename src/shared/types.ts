@@ -170,17 +170,14 @@ export interface LitterApi {
   getThread(sessionId: number): Promise<ThreadState>
   getSessionForDump(dumpId: number): Promise<number | null>
 
+  /** themes are created and maintained by the agent, never from the UI */
   listThemes(): Promise<Theme[]>
-  createTheme(name: string): Promise<Theme>
-  renameTheme(id: number, name: string): Promise<void>
-  deleteTheme(id: number): Promise<void>
 
   listDocs(themeId?: number | null): Promise<Doc[]>
   getDoc(id: number): Promise<Doc | null>
   updateDoc(id: number, patch: { title?: string; content?: string }): Promise<void>
   deleteDoc(id: number): Promise<void>
   setDocTheme(id: number, themeId: number | null): Promise<void>
-  createDoc(title: string): Promise<Doc>
 
   listTodos(): Promise<Todo[]>
   toggleTodo(id: number, done: boolean): Promise<void>

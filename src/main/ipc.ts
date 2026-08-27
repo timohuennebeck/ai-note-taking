@@ -33,16 +33,12 @@ export function registerIpc(db: LitterDb, agent: Agent): void {
   h('session:forDump', (dumpId: number) => db.latestSessionForDump(dumpId)?.id ?? null)
 
   h('themes:list', () => db.listThemes())
-  h('themes:create', (name: string) => db.createTheme(name))
-  h('themes:rename', (id: number, name: string) => db.updateTheme(id, { name }))
-  h('themes:delete', (id: number) => db.deleteTheme(id))
 
   h('docs:list', (themeId?: number | null) => db.listDocs(themeId ?? null))
   h('docs:get', (id: number) => db.getDoc(id))
   h('docs:update', (id: number, patch: { title?: string; content?: string }) => db.updateDoc(id, patch))
   h('docs:delete', (id: number) => db.deleteDoc(id))
   h('docs:setTheme', (id: number, themeId: number | null) => db.updateDoc(id, { themeId }))
-  h('docs:create', (title: string) => db.createDoc({ title, content: '' }))
 
   h('todos:list', () => db.listTodos())
   h('todos:toggle', (id: number, done: boolean) => db.setTodoDone(id, done))

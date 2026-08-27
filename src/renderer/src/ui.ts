@@ -80,6 +80,10 @@ export const optChip = (active: boolean): CSSProperties =>
         cursor: 'pointer'
       }
 
+/**
+ * Chip geometry only — the background lives in the `.litter-chip` CSS class
+ * so `:hover` can actually override it (an inline background never loses).
+ */
 export const chipCore: CSSProperties = {
   position: 'relative',
   display: 'flex',
@@ -91,7 +95,6 @@ export const chipCore: CSSProperties = {
   fontSize: 11.5,
   flex: 'none',
   maxWidth: 240,
-  background: 'var(--groupbg)',
   color: 'var(--text2)'
 }
 

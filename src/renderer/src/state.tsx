@@ -172,16 +172,34 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactEleme
   }, [])
 
   useEffect(() => {
+    const isTyping = (): boolean => {
+      const el = document.activeElement
+      return (
+        el instanceof HTMLElement &&
+        (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
+      )
+    }
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
         const el = document.activeElement
         if (el instanceof HTMLElement) el.blur()
         back()
+        return
+      }
+      // single-letter jumps, never while writing or with a modifier held
+      if (e.metaKey || e.ctrlKey || e.altKey || isTyping()) return
+      const key = e.key.toLowerCase()
+      if (key === 'u') {
+        e.preventDefault()
+        go({ view: 'notes' })
+      } else if (key === 't') {
+        e.preventDefault()
+        go({ view: 'themen' })
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [back])
+  }, [back, go])
 
   const submit = useCallback(
     async (text: string): Promise<void> => {

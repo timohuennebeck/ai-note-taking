@@ -6,7 +6,7 @@ import { Chat } from './components/Chat'
 import { Docs } from './components/Docs'
 import { NoteActions, NoteView } from './components/NoteView'
 import { Icon } from './icons'
-import { segBtn, toolBtn } from './ui'
+import { segBtn } from './ui'
 import { api, useStore } from './state'
 import type { Doc } from '@shared/types'
 
@@ -37,14 +37,6 @@ export default function App(): ReactElement {
     note: [currentDoc?.title ?? 'Notiz', '']
   }
   const [viewTitle, viewMeta] = titles[v] ?? ['', '']
-
-  const newDoc = (): void => {
-    void api.createDoc('Ohne Titel').then((d) => {
-      refresh()
-      go({ view: 'note', noteId: d.id })
-      setEditing(true)
-    })
-  }
 
   return (
     <section
@@ -112,20 +104,14 @@ export default function App(): ReactElement {
               </>
             )}
             {isDocs && (
-              <>
-                <span className="hover-bg" onClick={newDoc} style={toolBtn}>
-                  <Icon name="plus" size={13} style={{ color: 'var(--faint)' }} />
-                  Hinzufügen
+              <span style={{ display: 'flex', padding: 2, borderRadius: 7, background: 'var(--groupbg)', gap: 1 }}>
+                <span onClick={() => setDocsView('grid')} style={segBtn(docsView === 'grid')}>
+                  <Icon name="squares-2x2" size={14} />
                 </span>
-                <span style={{ display: 'flex', padding: 2, borderRadius: 7, background: 'var(--groupbg)', gap: 1 }}>
-                  <span onClick={() => setDocsView('grid')} style={segBtn(docsView === 'grid')}>
-                    <Icon name="squares-2x2" size={14} />
-                  </span>
-                  <span onClick={() => setDocsView('list')} style={segBtn(docsView === 'list')}>
-                    <Icon name="list-bullet" size={14} />
-                  </span>
+                <span onClick={() => setDocsView('list')} style={segBtn(docsView === 'list')}>
+                  <Icon name="list-bullet" size={14} />
                 </span>
-              </>
+              </span>
             )}
           </div>
         )}

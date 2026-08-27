@@ -8,10 +8,11 @@ Built from the design **“Dump v10 Ohne Sidebar”** (Claude Design).
 
 ## How it works
 
-- **Dump** — type a raw thought, hit Enter. The dump is stored verbatim and is *immutable*: the agent never edits it. Kepler reads it, splits mixed dumps into parts, appends to existing documents or creates new ones, files each document under exactly one theme (creating themes with its own filing rules as descriptions), and turns action items into todos.
+- **Dump** — type a raw thought, hit Enter. The dump is stored verbatim and is *immutable*: the agent never edits it. Kepler reads it, splits mixed dumps into parts, appends to existing documents or creates new ones, files each document under exactly one theme (creating themes with its own filing rules as descriptions), and turns action items into todos. Documents and themes are only ever created by Kepler — there is no manual "new document" button.
 - **Rückfragen** — when Kepler is genuinely unsure it asks up to two short questions with option chips, then shows a filing proposal (Titel / Thema / Todo) that you confirm with *„Passt, ablegen“*. Confident filings happen silently; you can re-file from the feed at any time.
 - **Frage** — switch the capture field to *Frage* and ask your notes. Kepler searches (SQLite FTS5), reads documents, and answers only from your notes. Every claim carries a citation `[source: note:ID "verbatim quote"]`; the app anchors the quote in the real document and shows *„Belegt durch“* chips — clicking one opens the document with the quoted passage highlighted. Citations that don't anchor are dropped, so hallucinated sources can't appear.
-- **Verlauf** — the home feed *is* the history: every dump stays there with what it was filed into, a hover menu to reopen its conversation, retry a failed filing, or delete it (the documents survive). Conversations are persisted and resume via the Agent SDK's session ids.
+- **Tastatur** — `U` opens Unterlagen, `T` Themen, `Esc` always returns to the home screen (never while you're typing).
+- **Verlauf** — the home feed *is* the history: every dump stays there with what it was filed into, a hover menu to reopen its conversation, retry a failed filing, or delete the entry (the documents survive). Conversations are persisted and resume via the Agent SDK's session ids.
 
 ## Stack
 
