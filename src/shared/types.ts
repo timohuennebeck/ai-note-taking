@@ -130,7 +130,11 @@ export type ThreadEntry =
       danger?: boolean
       confirmLabel?: string
     }
-  | { type: 'filed'; text: string; noteId: number | null; docTitle: string | null; docDate: string | null; docLines: string[] }
+  | {
+      type: 'filed'
+      /** every document this dump ended up in, not just the first */
+      docs: Array<{ noteId: number; title: string; date: string; lines: string[] }>
+    }
 
 /** A thread plus whether its agent session is still working. */
 export interface ThreadState {

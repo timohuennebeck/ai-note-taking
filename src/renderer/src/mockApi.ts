@@ -127,7 +127,26 @@ const todos: Todo[] = [
   { id: 3, text: 'Fado-Abend buchen', dueLabel: '12. Sep', themeName: 'Lissabon', noteId: 5, dumpId: 5, done: false, createdAt: daysAgo(1) }
 ]
 
+const longDump =
+  'Bewerbungen: https://www.linkedin.com/jobs/view/4361502751/ ' +
+  'https://www.linkedin.com/jobs/view/4353485777/ https://www.linkedin.com/jobs/view/4447574221/ ' +
+  'https://www.linkedin.com/jobs/view/4450073773/ https://www.linkedin.com/jobs/view/4438097506/ ' +
+  'https://www.linkedin.com/jobs/view/4443290471/ https://www.linkedin.com/jobs/view/4444111705/ ' +
+  'Habe hier noch den Bewerbungsflow: Projektordner mit Lebenslauf anlegen oder LinkedIn importieren, ' +
+  'weitere relevante Infos sammeln: Zeugnisse, Zertifikate, Projektreferenzen. Recherche: Stellenanzeige ' +
+  'recherchieren, URL sichern, Firmenprofil dazu.'
+
 const feed: FeedItem[] = [
+  {
+    dumpId: 7,
+    sessionId: 7,
+    time: '10:02',
+    createdAt: today(10, 2),
+    text: longDump,
+    status: 'processed',
+    pendingQuestions: 0,
+    parts: [{ kind: 'doc', label: 'Bewerbungen', noteId: 1, themeName: 'EmaBoard', action: 'created' }]
+  },
   {
     dumpId: 6,
     sessionId: 6,
@@ -230,15 +249,24 @@ const threads: Record<number, ThreadEntry[]> = {
     { type: 'user', text: 'Lass uns bitte 3 verschiedene Themen erstellen.' },
     {
       type: 'agent',
-      text: 'Erledigt, ich habe drei Themen angelegt:\n\n- Finanzen – für Geld, Rechnungen, Budgets\n- EmaBoard – für Vorhaben und Ideen\n- Familie – für Termine und Zuhause\n\nSchick mir einfach deinen nächsten Braindump, ich sortiere ihn passend ein.'
+      text: 'Abgelegt: die 14 Job-Links in Hero-Zeilen und der Prozess in Wochen-Digest (beide Thema EmaBoard), sowie Zahnarzt Milo und Lissabon-Reise als neue Dokumente im Thema Familie.\n\n- Finanzen – für Geld, Rechnungen, Budgets\n- EmaBoard – für Vorhaben und Ideen\n- Familie – für Termine und Zuhause'
     },
     {
       type: 'filed',
-      text: '',
-      noteId: 1,
-      docTitle: 'Hero-Zeilen',
-      docDate: 'heute',
-      docLines: ['Notizen, die sich selbst ablegen.', 'Kandidaten', 'Einfach schreiben. Ablegen macht Dump.', 'Dein Kopf ist zum Denken da', 'Erst dumpen, dann denken.']
+      docs: [
+        {
+          noteId: 1,
+          title: 'Hero-Zeilen',
+          date: 'heute',
+          lines: ['Notizen, die sich selbst ablegen.', 'Kandidaten', 'Einfach schreiben. Ablegen macht Dump.']
+        },
+        {
+          noteId: 4,
+          title: 'Wochen-Digest',
+          date: 'heute',
+          lines: ['Idee: wöchentliche Zusammenfassung aller Dumps', 'Automatisch am Sonntagabend']
+        }
+      ]
     }
   ]
 }

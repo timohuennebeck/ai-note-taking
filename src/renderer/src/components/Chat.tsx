@@ -41,7 +41,9 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
             padding: '10px 14px',
             fontSize: 13.5,
             lineHeight: 1.55,
-            userSelect: 'text'
+            userSelect: 'text',
+            overflowWrap: 'anywhere',
+            whiteSpace: 'pre-wrap'
           }}
         >
           {e.text}
@@ -53,8 +55,8 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
     )
   }
 
-  const body = (children: ReactElement): ReactElement => (
-    <div style={{ display: 'flex', gap: 10, maxWidth: '86%' }}>
+  const body = (children: ReactElement, wide = false): ReactElement => (
+    <div style={{ display: 'flex', gap: 10, maxWidth: wide ? '100%' : '86%' }}>
       <LitterAvatar />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
         {children}
@@ -168,43 +170,65 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
     )
   }
 
-  if (e.type === 'filed' && e.docTitle != null) {
+  if (e.type === 'filed' && e.docs.length > 0) {
     return body(
-      <div
-        onClick={() => e.noteId != null && go({ view: 'note', noteId: e.noteId })}
-        style={{ width: 132, display: 'flex', flexDirection: 'column', gap: 9, cursor: 'pointer', marginTop: 2 }}
-      >
-        <div
-          className="hover-accent-ring"
-          style={{
-            height: 140,
-            borderRadius: 10,
-            background: 'var(--card)',
-            boxShadow: '0 0 0 1px var(--ring)',
-            padding: 11,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4
-          }}
-        >
-          <div style={{ fontSize: 8.5, fontWeight: 600, lineHeight: 1.4 }}>{e.docTitle}</div>
-          {e.docLines.map((line, i) => (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 2 }}>
+        {e.docs.map((d) => (
+          <div
+            key={d.noteId}
+            onClick={() => go({ view: 'note', noteId: d.noteId })}
+            style={{ width: 132, display: 'flex', flexDirection: 'column', gap: 9, cursor: 'pointer' }}
+          >
             <div
-              key={i}
-              style={{ fontSize: 7, lineHeight: 1.65, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              className="hover-accent-ring"
+              style={{
+                height: 140,
+                borderRadius: 10,
+                background: 'var(--card)',
+                boxShadow: '0 0 0 1px var(--ring)',
+                padding: 11,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4
+              }}
             >
-              {line}
+              <div style={{ fontSize: 8.5, fontWeight: 600, lineHeight: 1.4 }}>{d.title}</div>
+              {d.lines.map((line, i) => (
+                <div
+                  key={i}
+                  style={{
+                    fontSize: 7,
+                    lineHeight: 1.65,
+                    color: 'var(--muted)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {line}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-          <span style={{ fontSize: 12.5, fontWeight: 500, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {e.docTitle}
-          </span>
-          <span style={{ fontSize: 11.5, color: 'var(--faint)' }}>{e.docDate}</span>
-        </div>
-      </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+              <span
+                style={{
+                  fontSize: 12.5,
+                  fontWeight: 500,
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {d.title}
+              </span>
+              <span style={{ fontSize: 11.5, color: 'var(--faint)' }}>{d.date}</span>
+            </div>
+          </div>
+        ))}
+      </div>,
+      true
     )
   }
 

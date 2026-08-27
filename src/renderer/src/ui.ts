@@ -115,7 +115,7 @@ export const toolBtn: CSSProperties = {
 export const blockStyle: Record<string, CSSProperties> = {
   h: { fontSize: 14.5, fontWeight: 600, margin: '18px 0 2px' },
   p: { fontSize: 14, lineHeight: 1.7, color: 'var(--text2)', marginTop: 10 },
-  b: { fontSize: 14, lineHeight: 1.7, color: 'var(--text2)', marginTop: 4, paddingLeft: 18, textIndent: -12 },
+  b: { fontSize: 14, lineHeight: 1.7, color: 'var(--text2)', marginTop: 4 },
   c: {
     fontFamily: 'ui-monospace, Menlo, monospace',
     fontSize: 12,

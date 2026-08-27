@@ -19,7 +19,7 @@ function ThemeChip({ name, onClick }: { name: string; onClick: () => void }): Re
     <span
       className="litter-chip litter-chip-click"
       onClick={onClick}
-      style={{ ...chipCore, cursor: 'pointer', display: 'inline-flex', verticalAlign: '-5px' }}
+      style={{ ...chipCore, cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle' }}
     >
       <Icon name="folder-open" size={11} />
       {name}
@@ -32,7 +32,7 @@ function DocChip({ name, onClick }: { name: string; onClick: () => void }): Reac
     <span
       className="litter-chip litter-chip-click"
       onClick={onClick}
-      style={{ ...chipCore, cursor: 'pointer', display: 'inline-flex', verticalAlign: '-5px' }}
+      style={{ ...chipCore, cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle' }}
     >
       <DocGlyph />
       {name}
@@ -123,8 +123,8 @@ export function AgentText({ text }: { text: string }): ReactElement {
         style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '4px 0 2px' }}
       >
         {items.map((b, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
-            <span style={{ color: 'var(--ghost)', flex: 'none' }}>·</span>
+          <div key={i} style={{ display: 'flex', gap: 8 }}>
+            <span style={{ color: 'var(--ghost)', flex: 'none' }}>•</span>
             <span style={{ flex: 1, minWidth: 0 }}>{inline(b, refs, open, `li-${blocks.length}-${i}`)}</span>
           </div>
         ))}
@@ -149,5 +149,9 @@ export function AgentText({ text }: { text: string }): ReactElement {
   })
   flush()
 
-  return <div style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--text2)', userSelect: 'text' }}>{blocks}</div>
+  // chips are 22px tall, so the line box needs to be at least that to keep
+  // wrapped lines evenly spaced
+  return (
+    <div style={{ fontSize: 13.5, lineHeight: '26px', color: 'var(--text2)', userSelect: 'text' }}>{blocks}</div>
+  )
 }

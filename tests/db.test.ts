@@ -206,6 +206,24 @@ describe('feed + thread', () => {
     expect(buildFeed(db)[0].status).toBe('failed')
   })
 
+  it('lists every filed document in the thread, not just the first', () => {
+    const dump = db.createDump('Bewerbungen und Prozess')
+    const session = db.createSession('process_dump', dump.id)
+    db.addMessage(session.id, 'user', dump.content)
+    const a = db.createDoc({ title: 'Offene Stellen', content: '- Link', dumpId: dump.id })
+    const b = db.createDoc({ title: 'Bewerbungsflow', content: '- Schritt', dumpId: dump.id })
+    db.addFiling(dump.id, a.id, 'created')
+    db.addFiling(dump.id, b.id, 'created')
+    db.finishSession(session.id, 'Abgelegt.', null)
+
+    const filed = buildThread(db, session.id).entries.at(-1)
+    expect(filed).toMatchObject({ type: 'filed' })
+    expect((filed as { docs: Array<{ title: string }> }).docs.map((d) => d.title)).toEqual([
+      'Offene Stellen',
+      'Bewerbungsflow'
+    ])
+  })
+
   it('reports a still-running session so the chat can show the indicator', () => {
     const dump = db.createDump('Zahnarzt anrufen')
     const session = db.createSession('process_dump', dump.id)
@@ -246,6 +264,9 @@ describe('feed + thread', () => {
     const { entries, running } = buildThread(db, session.id)
     expect(entries.map((t) => t.type)).toEqual(['user', 'question', 'user', 'proposal', 'agent', 'filed'])
     expect(running).toBe(false)
-    expect(entries.at(-1)).toMatchObject({ type: 'filed', docTitle: 'Hero', docLines: ['Zeile'] })
+    expect(entries.at(-1)).toMatchObject({
+      type: 'filed',
+      docs: [{ title: 'Hero', lines: ['Zeile'] }]
+    })
   })
 })

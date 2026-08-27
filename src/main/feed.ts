@@ -105,18 +105,18 @@ export function buildThread(db: LitterDb, sessionId: number): ThreadState {
       text: `⚠️ Ablage fehlgeschlagen: ${session.error}\n\nDer Roh-Dump ist gespeichert — im Feed auf „erneut versuchen“ tippen.`
     })
   }
-  // Filed summary card: show the first document created from this dump.
+  // Filed summary: a card per document this dump was filed into.
   if (session.dumpId != null && session.finishedAt && !session.error) {
     const docs = db.docsForDump(session.dumpId)
     if (docs.length) {
-      const d = docs[0]
       entries.push({
         type: 'filed',
-        text: '',
-        noteId: d.id,
-        docTitle: d.title,
-        docDate: dayLabel(d.updatedAt),
-        docLines: previewLines(d.content, 8)
+        docs: docs.map((d) => ({
+          noteId: d.id,
+          title: d.title,
+          date: dayLabel(d.updatedAt),
+          lines: previewLines(d.content, 8)
+        }))
       })
     }
   }

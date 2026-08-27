@@ -224,7 +224,9 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
       }}
     >
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={{ fontSize: 13, lineHeight: 1.5, paddingRight: 46 }}>{item.text}</span>
+        <span className="litter-clamp" style={{ fontSize: 13, lineHeight: 1.5, paddingRight: 46 }}>
+          {item.text}
+        </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 22 }}>
         {pending ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

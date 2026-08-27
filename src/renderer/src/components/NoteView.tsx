@@ -103,12 +103,39 @@ export function NoteView({
             }}
           />
         ) : (
-          blocks.map((b, i) => (
-            <div key={i} style={{ ...blockStyle[b.kind], userSelect: 'text' }}>
-              {b.kind === 'b' ? '–  ' : b.kind === 'todo' ? '☐  ' : ''}
-              {withHighlight(b.text, quote)}
-            </div>
-          ))
+          blocks.map((b, i) =>
+            b.kind === 'b' ? (
+              <div
+                key={i}
+                style={{ ...blockStyle.b, display: 'flex', gap: 10, userSelect: 'text' }}
+              >
+                <span style={{ flex: 'none', color: 'var(--ghost)', lineHeight: 1.7 }}>•</span>
+                <span style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+                  {withHighlight(b.text, quote)}
+                </span>
+              </div>
+            ) : b.kind === 'todo' ? (
+              <div key={i} style={{ ...blockStyle.todo, display: 'flex', gap: 10, userSelect: 'text' }}>
+                <span
+                  style={{
+                    width: 13,
+                    height: 13,
+                    flex: 'none',
+                    marginTop: 3,
+                    borderRadius: 4,
+                    boxShadow: 'inset 0 0 0 1.5px var(--ghost)'
+                  }}
+                />
+                <span style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+                  {withHighlight(b.text, quote)}
+                </span>
+              </div>
+            ) : (
+              <div key={i} style={{ ...blockStyle[b.kind], userSelect: 'text', overflowWrap: 'anywhere' }}>
+                {withHighlight(b.text, quote)}
+              </div>
+            )
+          )
         )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 26, fontSize: 11.5, color: 'var(--ghost)' }}>
           <Icon name="lock-closed" size={12} />
