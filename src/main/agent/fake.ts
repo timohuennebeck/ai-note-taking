@@ -20,6 +20,10 @@ export class FakeAgentService {
     this.emit = opts.emit
   }
 
+  getModel(): string {
+    return 'demo'
+  }
+
   getAuthStatus(): { ok: boolean; detail: string } {
     return { ok: true, detail: 'Demo-Modus (LITTER_FAKE_AGENT)' }
   }

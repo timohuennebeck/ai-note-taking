@@ -70,6 +70,13 @@ export interface AgentServiceOptions {
   emit: (ev: AgentEvent) => void
 }
 
+/**
+ * Model the agent runs on. Filing a dump is a well-scoped task with clear
+ * tools, so Sonnet handles it quickly; override per machine if you want to
+ * try another tier without rebuilding.
+ */
+const MODEL = process.env.LITTER_MODEL ?? 'claude-sonnet-5'
+
 export class AgentService {
   readonly interactions = new InteractionRegistry()
   private db: LitterDb
@@ -91,6 +98,10 @@ export class AgentService {
   }
 
   /* ---------------- auth ---------------- */
+
+  getModel(): string {
+    return MODEL
+  }
 
   getAuthStatus(): { ok: boolean; detail: string } {
     if (process.env.CLAUDE_CODE_OAUTH_TOKEN) return { ok: true, detail: 'CLAUDE_CODE_OAUTH_TOKEN' }
@@ -130,6 +141,7 @@ export class AgentService {
     const options: Options = {
       abortController: abort,
       systemPrompt,
+      model: MODEL,
       cwd: this.libraryDir,
       // No built-in tools: the agent works exclusively through the litter MCP
       // server, so it can never touch anything outside the app's own data.
@@ -178,6 +190,8 @@ export class AgentService {
       for await (const message of q as AsyncIterable<SDKMessage>) {
         if (message.type === 'system' && message.subtype === 'init') {
           this.db.setSdkSessionId(sessionId, message.session_id)
+          // what the runtime actually resolved — the ground truth, not our request
+          if (process.env.LITTER_DEBUG) console.log('[agent] model:', message.model)
         } else if (message.type === 'assistant') {
           const blocks = message.message.content
           const textParts: string[] = []

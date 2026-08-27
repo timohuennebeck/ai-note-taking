@@ -72,7 +72,7 @@ interface Store {
   dark: boolean
   toggleDark: () => void
 
-  auth: { ok: boolean; detail: string } | null
+  auth: { ok: boolean; detail: string; model: string } | null
 }
 
 const Ctx = createContext<Store | null>(null)
@@ -96,7 +96,7 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactEleme
   const [thread, setThread] = useState<ThreadEntry[]>([])
   const [threadBusy, setThreadBusy] = useState(false)
   const [justSentDump, setJustSentDump] = useState<number | null>(null)
-  const [auth, setAuth] = useState<{ ok: boolean; detail: string } | null>(null)
+  const [auth, setAuth] = useState<{ ok: boolean; detail: string; model: string } | null>(null)
   const [dark, setDark] = useState<boolean>(() => localStorage.getItem('litter.dark') === '1')
 
   const askSession = useRef<number | null>(null)

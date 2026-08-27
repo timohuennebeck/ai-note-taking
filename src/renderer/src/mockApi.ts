@@ -389,7 +389,7 @@ export const mockApi: LitterApi = {
     if (t) t.done = done
   },
   async getAuthStatus() {
-    return { ok: true, detail: 'Browser-Demo' }
+    return { ok: true, detail: 'Browser-Demo', model: 'demo' }
   },
   onAgentEvent(handler) {
     handlers.add(handler)

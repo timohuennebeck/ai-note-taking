@@ -26,7 +26,10 @@ export function registerIpc(db: LitterDb, agent: Agent): void {
     agent.resolveProposal(sessionId, proposalId, accepted)
   )
   h('agent:sendChat', (sessionId: number, text: string) => agent.sendChatMessage(sessionId, text))
-  h('agent:authStatus', () => agent.getAuthStatus())
+  h('agent:authStatus', () => {
+    const status = agent.getAuthStatus()
+    return { ...status, model: agent.getModel() }
+  })
 
   h('feed:list', (limit?: number) => buildFeed(db, limit ?? 200))
   h('thread:get', (sessionId: number) => buildThread(db, sessionId))

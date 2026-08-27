@@ -193,7 +193,7 @@ export interface LitterApi {
   listTodos(): Promise<Todo[]>
   toggleTodo(id: number, done: boolean): Promise<void>
 
-  getAuthStatus(): Promise<{ ok: boolean; detail: string }>
+  getAuthStatus(): Promise<{ ok: boolean; detail: string; model: string }>
 
   onAgentEvent(handler: (ev: AgentEvent) => void): () => void
 }

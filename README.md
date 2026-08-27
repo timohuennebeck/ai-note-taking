@@ -21,7 +21,7 @@ Built from the design **“Dump v10 Ohne Sidebar”** (Claude Design).
 |---|---|
 | Shell | Electron + electron-vite, React 18, TypeScript |
 | Database | better-sqlite3 (WAL), FTS5 full-text index, local file in `~/Library/Application Support/Litter/` |
-| AI | `@anthropic-ai/claude-agent-sdk` in the main process — uses your **Claude subscription login**, no API key. No model is pinned, so the agent runs on whatever model your `claude` CLI defaults to |
+| AI | `@anthropic-ai/claude-agent-sdk` in the main process — uses your **Claude subscription login**, no API key. Pinned to `claude-sonnet-5`; override with `LITTER_MODEL` |
 | Agent tools | In-process MCP server (`list_themes`, `create_document`, `append_to_document`, `create_todo`, `search_notes`, `delete_documents`, `delete_themes`, `ask_user`, `propose_filing`, …) |
 
 The agent gets **no built-in tools** (`tools: []`) — it can only act through the app's own MCP tools, so it can never touch anything outside the app's data. Inside Electron the SDK runtime is spawned with Electron's own binary (`ELECTRON_RUN_AS_NODE`), so no system Node is required.
@@ -65,4 +65,14 @@ LITTER_FAKE_AGENT=1 npm run dev
 
 runs a scripted stand-in agent (filing, Rückfragen, proposals, cited answers) — used by the E2E tests, handy for UI work.
 
-Other env vars: `LITTER_DB_PATH` (custom database location), `LITTER_DEBUG=1` (agent stderr logging).
+### Model
+
+The agent is pinned to `claude-sonnet-5` — the filing work is well-scoped and tool-driven, so Sonnet is fast and accurate enough for it, and the app behaves the same on every machine regardless of your CLI's default. To try another tier:
+
+```bash
+LITTER_MODEL=claude-opus-5 npm run dev
+```
+
+`LITTER_DEBUG=1` logs the model the runtime actually resolved (`[agent] model: …`), which is the ground truth if you ever wonder what ran.
+
+Other env vars: `LITTER_DB_PATH` (custom database location).
