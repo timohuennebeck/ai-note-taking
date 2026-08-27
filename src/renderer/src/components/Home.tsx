@@ -224,7 +224,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
       }}
     >
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={{ fontSize: 13, lineHeight: 1.5 }}>{item.text}</span>
+        <span style={{ fontSize: 13, lineHeight: 1.5, paddingRight: 46 }}>{item.text}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 22 }}>
         {pending ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -381,6 +381,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
               width: 22,
               height: 22,
               flex: 'none',
+              marginRight: -1,
               borderRadius: 6,
               color: 'var(--faint)',
               cursor: 'pointer',
@@ -392,7 +393,14 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
         </div>
       </div>
       <span
-        style={{ fontSize: 11, color: 'var(--ghost)', flex: 'none', paddingTop: 3, fontVariantNumeric: 'tabular-nums' }}
+        style={{
+          position: 'absolute',
+          top: 13,
+          right: 10,
+          fontSize: 11,
+          color: 'var(--ghost)',
+          fontVariantNumeric: 'tabular-nums'
+        }}
       >
         {fresh ? 'gerade' : item.time}
       </span>
