@@ -147,8 +147,8 @@ function AskResult(): ReactElement | null {
         {ask.question}
       </div>
       {ask.pending ? (
-        <div className="kepler-pending" style={{ fontSize: 13, marginTop: 14 }}>
-          Kepler liest deine Unterlagen …
+        <div className="litter-pending" style={{ fontSize: 13, marginTop: 14 }}>
+          Litter liest deine Unterlagen …
         </div>
       ) : (
         <>
@@ -197,12 +197,17 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
   const fresh = item.dumpId === justSentDump
   const pending = item.status === 'pending' || item.status === 'processing'
   const docParts = item.parts.filter((p) => p.kind === 'doc')
+  const themeParts = item.parts.filter((p) => p.kind === 'theme')
   const splitLabel =
-    item.parts.length > 1
-      ? 'aufgeteilt in'
-      : docParts[0]?.action === 'appended'
-        ? 'ergänzt in'
-        : 'abgelegt in'
+    docParts.length === 0 && themeParts.length > 0
+      ? themeParts.length > 1
+        ? 'Themen angelegt'
+        : 'Thema angelegt'
+      : item.parts.length > 1
+        ? 'aufgeteilt in'
+        : docParts[0]?.action === 'appended'
+          ? 'ergänzt in'
+          : 'abgelegt in'
 
   return (
     <div
@@ -239,17 +244,17 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
                     justifyContent: 'center'
                   }}
                 >
-                  K
+                  L
                 </span>
                 <span style={{ fontSize: 11.5, color: 'var(--accent)' }}>
-                  Kepler hat {item.pendingQuestions === 1 ? 'eine Rückfrage' : `${item.pendingQuestions} Rückfragen`}
+                  Litter hat {item.pendingQuestions === 1 ? 'eine Rückfrage' : `${item.pendingQuestions} Rückfragen`}
                 </span>
               </>
             ) : item.status === 'pending' ? (
-              <span style={{ fontSize: 11.5, color: 'var(--faint)' }}>wartet auf Kepler</span>
+              <span style={{ fontSize: 11.5, color: 'var(--faint)' }}>wartet auf Litter</span>
             ) : (
-              <span className="kepler-pending" style={{ fontSize: 11.5 }}>
-                Kepler sortiert ein …
+              <span className="litter-pending" style={{ fontSize: 11.5 }}>
+                Litter sortiert ein …
               </span>
             )}
           </span>
@@ -327,6 +332,21 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
                       </>
                     )}
                   </>
+                ) : p.kind === 'theme' ? (
+                  <span
+                    className="litter-chip litter-chip-click"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (p.themeId != null)
+                        go({ view: 'filter', themeId: p.themeId, themeName: p.themeName })
+                    }}
+                    style={{ ...chipCore, cursor: 'pointer' }}
+                  >
+                    <Icon name="folder-open" size={11} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.label}
+                    </span>
+                  </span>
                 ) : (
                   <span className="litter-chip" onClick={(e) => e.stopPropagation()} style={{ ...chipCore, cursor: 'default' }}>
                     <span

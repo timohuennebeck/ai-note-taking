@@ -8,6 +8,10 @@ export function buildFeed(db: LitterDb, limit = 30): FeedItem[] {
     const session = db.latestSessionForDump(dump.id)
     const docs = db.docsForDump(dump.id)
     const todos = db.todosForDump(dump.id)
+    // themes the agent created here but that hold none of this dump's documents
+    // still deserve a chip — otherwise "Thema angelegt" looks like nothing happened
+    const docThemeIds = new Set(docs.map((d) => d.themeId))
+    const newThemes = db.themesForDump(dump.id).filter((t) => !docThemeIds.has(t.id))
     const parts: FilingPart[] = [
       ...docs.map((d) => ({
         kind: 'doc' as const,
@@ -19,7 +23,8 @@ export function buildFeed(db: LitterDb, limit = 30): FeedItem[] {
       ...todos.map((t) => ({
         kind: 'todo' as const,
         label: t.dueLabel ? `${t.text} · ${t.dueLabel}` : t.text
-      }))
+      })),
+      ...newThemes.map((t) => ({ kind: 'theme' as const, label: t.name, themeId: t.id, themeName: t.name }))
     ]
     let pendingQuestions = 0
     if (session && !session.finishedAt) {

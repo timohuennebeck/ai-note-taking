@@ -1,6 +1,6 @@
 # Litter
 
-Brain-dump notes that file themselves. A local-first macOS app: you dump raw thoughts, and **Kepler** — an agent built on the Claude Agent SDK — splits them into documents, sorts them into themes, detects todos, and answers questions from your own notes with quote-anchored citations. Everything lives in a local SQLite database; there is no online backend.
+Brain-dump notes that file themselves. A local-first macOS app: you dump raw thoughts, and **Litter** — an agent built on the Claude Agent SDK — splits them into documents, sorts them into themes, detects todos, and answers questions from your own notes with quote-anchored citations. Everything lives in a local SQLite database; there is no online backend.
 
 Built from the design **“Dump v10 Ohne Sidebar”** (Claude Design).
 
@@ -8,9 +8,9 @@ Built from the design **“Dump v10 Ohne Sidebar”** (Claude Design).
 
 ## How it works
 
-- **Dump** — type a raw thought, hit Enter. The dump is stored verbatim and is *immutable*: the agent never edits it. Kepler reads it, splits mixed dumps into parts, appends to existing documents or creates new ones, files each document under exactly one theme (creating themes with its own filing rules as descriptions), and turns action items into todos. Documents and themes are only ever created by Kepler — there is no manual "new document" button.
-- **Rückfragen** — when Kepler is genuinely unsure it asks up to two short questions with option chips, then shows a filing proposal (Titel / Thema / Todo) that you confirm with *„Passt, ablegen“*. Confident filings happen silently; you can re-file from the feed at any time.
-- **Frage** — switch the capture field to *Frage* and ask your notes. Kepler searches (SQLite FTS5), reads documents, and answers only from your notes. Every claim carries a citation `[source: note:ID "verbatim quote"]`; the app anchors the quote in the real document and shows *„Belegt durch“* chips — clicking one opens the document with the quoted passage highlighted. Citations that don't anchor are dropped, so hallucinated sources can't appear.
+- **Dump** — type a raw thought, hit Enter. The dump is stored verbatim and is *immutable*: the agent never edits it. Litter reads it, splits mixed dumps into parts, appends to existing documents or creates new ones, files each document under exactly one theme (creating themes with its own filing rules as descriptions), and turns action items into todos. Documents and themes are only ever created by Litter — there is no manual "new document" button.
+- **Rückfragen** — when Litter is genuinely unsure it asks up to two short questions with option chips, then shows a filing proposal (Titel / Thema / Todo) that you confirm with *„Passt, ablegen“*. Confident filings happen silently; you can re-file from the feed at any time.
+- **Frage** — switch the capture field to *Frage* and ask your notes. Litter searches (SQLite FTS5), reads documents, and answers only from your notes. Every claim carries a citation `[source: note:ID "verbatim quote"]`; the app anchors the quote in the real document and shows *„Belegt durch“* chips — clicking one opens the document with the quoted passage highlighted. Citations that don't anchor are dropped, so hallucinated sources can't appear.
 - **Tastatur** — `U` opens Unterlagen, `T` Themen, `Esc` always returns to the home screen (never while you're typing).
 - **Verlauf** — the home feed *is* the history: every dump stays there with what it was filed into, a hover menu to reopen its conversation, retry a failed filing, or delete the entry (the documents survive). Conversations are persisted and resume via the Agent SDK's session ids.
 
@@ -20,7 +20,7 @@ Built from the design **“Dump v10 Ohne Sidebar”** (Claude Design).
 |---|---|
 | Shell | Electron + electron-vite, React 18, TypeScript |
 | Database | better-sqlite3 (WAL), FTS5 full-text index, local file in `~/Library/Application Support/Litter/` |
-| AI | `@anthropic-ai/claude-agent-sdk` in the main process — uses your **Claude subscription login**, no API key |
+| AI | `@anthropic-ai/claude-agent-sdk` in the main process — uses your **Claude subscription login**, no API key. No model is pinned, so the agent runs on whatever model your `claude` CLI defaults to |
 | Agent tools | In-process MCP server (`list_themes`, `create_document`, `append_to_document`, `create_todo`, `search_notes`, `ask_user`, `propose_filing`, …) |
 
 The agent gets **no built-in tools** (`tools: []`) — it can only act through the app's own MCP tools, so it can never touch anything outside the app's data. Inside Electron the SDK runtime is spawned with Electron's own binary (`ELECTRON_RUN_AS_NODE`), so no system Node is required.

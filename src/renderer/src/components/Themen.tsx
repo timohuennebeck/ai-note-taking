@@ -39,7 +39,7 @@ export function Themen(): ReactElement {
         ))}
         {themes.length === 0 && (
           <div style={{ fontSize: 12.5, color: 'var(--faint)', textAlign: 'center', marginTop: 40 }}>
-            Noch keine Themen — Kepler legt sie an, sobald du etwas ablegst.
+            Noch keine Themen — Litter legt sie an, sobald du etwas ablegst.
           </div>
         )}
       </div>

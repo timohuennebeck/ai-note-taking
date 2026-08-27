@@ -70,9 +70,10 @@ export interface AgentMessage {
 
 /** What the agent did to a single dump — drives the feed + history rows. */
 export interface FilingPart {
-  kind: 'doc' | 'todo'
+  kind: 'doc' | 'todo' | 'theme'
   label: string
   noteId?: number
+  themeId?: number
   themeName?: string
   /** whether the dump created this document or was appended to it */
   action?: 'created' | 'appended'
@@ -131,7 +132,7 @@ export type ThreadEntry =
 /** A thread plus whether its agent session is still working. */
 export interface ThreadState {
   entries: ThreadEntry[]
-  /** session started but not finished — Kepler is still on it */
+  /** session started but not finished — Litter is still on it */
   running: boolean
 }
 

@@ -227,6 +227,11 @@ const threads: Record<number, ThreadEntry[]> = {
       committedAt: '09:12'
     },
     { type: 'agent', text: 'Abgelegt. Der Roh-Dump bleibt unverändert — das Dokument ist nur eine Ansicht darauf.' },
+    { type: 'user', text: 'Lass uns bitte 3 verschiedene Themen erstellen.' },
+    {
+      type: 'agent',
+      text: 'Erledigt, ich habe drei Themen angelegt:\n\n- Finanzen – für Geld, Rechnungen, Budgets\n- EmaBoard – für Vorhaben und Ideen\n- Familie – für Termine und Zuhause\n\nSchick mir einfach deinen nächsten Braindump, ich sortiere ihn passend ein.'
+    },
     {
       type: 'filed',
       text: '',

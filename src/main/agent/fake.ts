@@ -120,6 +120,7 @@ export class FakeAgentService {
     }
 
     const themeRow = this.db.createTheme(chosenTheme)
+    this.db.addThemeFiling(dumpId, themeRow.id)
     const bullets = content
       .split(/\n+|(?<=[.!?])\s+/)
       .map((s) => s.trim())

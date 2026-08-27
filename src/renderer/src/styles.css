@@ -35,18 +35,18 @@ a:hover { opacity: 0.75; }
 input, textarea { font-family: inherit; color: var(--ink); }
 input::placeholder, textarea::placeholder { color: var(--faint); }
 
-@keyframes kepler-fade {
+@keyframes litter-fade {
   0% { background-position: 130% 0; }
   100% { background-position: -30% 0; }
 }
 
-.kepler-pending {
+.litter-pending {
   background: linear-gradient(90deg, var(--muted) 30%, var(--accent) 50%, var(--muted) 70%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: kepler-fade 1.6s linear infinite;
+  animation: litter-fade 1.6s linear infinite;
 }
 
 .hover-bg:hover { background: var(--hover); }

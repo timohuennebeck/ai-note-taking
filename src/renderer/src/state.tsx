@@ -119,7 +119,7 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactEleme
     if (sid == null) return
     void api.getThread(sid).then((t) => {
       setThread(t.entries)
-      // the session itself is the source of truth for "Kepler is working"
+      // the session itself is the source of truth for "Litter is working"
       setThreadBusy(t.running)
     })
   }, [])

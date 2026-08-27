@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { Icon } from '../icons'
 import { optChip } from '../ui'
-import { renderInline } from '../md'
+import { AgentText } from './AgentText'
 import { useStore } from '../state'
 import type { ThreadEntry } from '@shared/types'
 
-function KeplerAvatar({ size = 20 }: { size?: number }): ReactElement {
+function LitterAvatar({ size = 20 }: { size?: number }): ReactElement {
   return (
     <span
       style={{
@@ -23,7 +23,7 @@ function KeplerAvatar({ size = 20 }: { size?: number }): ReactElement {
         justifyContent: 'center'
       }}
     >
-      K
+      L
     </span>
   )
 }
@@ -55,7 +55,7 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
 
   const body = (children: ReactElement): ReactElement => (
     <div style={{ display: 'flex', gap: 10, maxWidth: '86%' }}>
-      <KeplerAvatar />
+      <LitterAvatar />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
         {children}
       </div>
@@ -64,8 +64,8 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
 
   if (e.type === 'agent') {
     return body(
-      <div style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--text2)', marginTop: 1, userSelect: 'text', whiteSpace: 'pre-wrap' }}>
-        {renderInline(e.text)}
+      <div style={{ marginTop: 1 }}>
+        <AgentText text={e.text} />
       </div>
     )
   }
@@ -212,7 +212,7 @@ export function Chat(): ReactElement {
   // first pass over a fresh dump reads as filing, later turns as thinking
   const filedYet = thread.some((e) => e.type === 'agent' || e.type === 'filed' || e.type === 'proposal')
   const busy = threadBusy && !hasOpenChoices
-  const busyLabel = filedYet ? 'Kepler denkt nach …' : 'Kepler sortiert ein …'
+  const busyLabel = filedYet ? 'Litter denkt nach …' : 'Litter sortiert ein …'
 
   useEffect(() => {
     const el = scrollRef.current
@@ -231,8 +231,8 @@ export function Chat(): ReactElement {
           ))}
           {busy && (
             <div style={{ display: 'flex', gap: 10 }}>
-              <KeplerAvatar />
-              <span className="kepler-pending" style={{ fontSize: 13, marginTop: 2 }}>
+              <LitterAvatar />
+              <span className="litter-pending" style={{ fontSize: 13, marginTop: 2 }}>
                 {busyLabel}
               </span>
             </div>

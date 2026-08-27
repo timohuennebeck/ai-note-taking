@@ -21,13 +21,15 @@ describe('LitterDb', () => {
     expect(db.getDump(dump.id)?.content).toBe('Zahnarzt anrufen wegen Milo')
   })
 
-  it('strips emoji that ended up in theme names on open', () => {
+  it('drops the legacy emoji column and strips emoji from theme names on open', () => {
     const file = path.join(os.tmpdir(), `litter-emoji-${process.pid}.sqlite3`)
     for (const suffix of ['', '-wal', '-shm']) {
       try { fs.unlinkSync(file + suffix) } catch { /* not there */ }
     }
     const first = new LitterDb(file)
-    first.db.prepare("INSERT INTO themes (name) VALUES ('🗂️ EmaBoard')").run()
+    // an older database also had an emoji column
+    first.db.exec('ALTER TABLE themes ADD COLUMN emoji TEXT')
+    first.db.prepare("INSERT INTO themes (name, emoji) VALUES ('🗂️ EmaBoard', '🗂️')").run()
     first.db.prepare("INSERT INTO themes (name) VALUES ('✈️  Lissabon')").run()
     first.db.prepare("INSERT INTO themes (name) VALUES ('Familie')").run()
     first.close()
@@ -35,6 +37,10 @@ describe('LitterDb', () => {
     // reopening runs the migration
     const second = new LitterDb(file)
     expect(second.listThemes().map((t) => t.name)).toEqual(['EmaBoard', 'Familie', 'Lissabon'])
+    const cols = (second.db.prepare('PRAGMA table_info(themes)').all() as Array<{ name: string }>).map(
+      (c) => c.name
+    )
+    expect(cols).not.toContain('emoji')
     second.close()
     for (const suffix of ['', '-wal', '-shm']) {
       try { fs.unlinkSync(file + suffix) } catch { /* not there */ }

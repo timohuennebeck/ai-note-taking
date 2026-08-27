@@ -27,8 +27,6 @@ CREATE TABLE IF NOT EXISTS themes (
   id            INTEGER PRIMARY KEY,
   name          TEXT NOT NULL UNIQUE,
   description   TEXT,
-  -- legacy, unused: kept so existing databases keep opening
-  emoji         TEXT,
   created_at    TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -65,6 +63,13 @@ CREATE TABLE IF NOT EXISTS filings (
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_filings_dump ON filings(dump_id);
+
+CREATE TABLE IF NOT EXISTS dump_themes (
+  dump_id       INTEGER NOT NULL REFERENCES dumps(id) ON DELETE CASCADE,
+  theme_id      INTEGER NOT NULL REFERENCES themes(id) ON DELETE CASCADE,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (dump_id, theme_id)
+);
 
 CREATE TABLE IF NOT EXISTS agent_sessions (
   id             INTEGER PRIMARY KEY,
@@ -218,7 +223,20 @@ export class LitterDb {
     this.db.pragma('journal_mode = WAL')
     this.db.pragma('foreign_keys = ON')
     this.db.exec(SCHEMA)
+    this.migrate()
+  }
+
+  /** Small forward-only migrations for databases created by older versions. */
+  private migrate(): void {
+    this.dropThemeEmojiColumn()
     this.stripEmojiFromThemeNames()
+  }
+
+  /** Themes carried an emoji column once; it is gone for good. */
+  private dropThemeEmojiColumn(): void {
+    const cols = this.db.prepare('PRAGMA table_info(themes)').all() as Array<{ name: string }>
+    if (!cols.some((c) => c.name === 'emoji')) return
+    this.db.exec('ALTER TABLE themes DROP COLUMN emoji')
   }
 
   /**
@@ -481,6 +499,24 @@ export class LitterDb {
       .run(dumpId, noteId, action)
   }
 
+  /** Record a theme the agent created while working on this dump. */
+  addThemeFiling(dumpId: number, themeId: number): void {
+    this.db
+      .prepare('INSERT OR IGNORE INTO dump_themes (dump_id, theme_id) VALUES (?, ?)')
+      .run(dumpId, themeId)
+  }
+
+  themesForDump(dumpId: number): Theme[] {
+    const rows = this.db
+      .prepare(
+        `SELECT t.*, (SELECT COUNT(*) FROM notes n WHERE n.theme_id = t.id) AS doc_count
+         FROM dump_themes dt JOIN themes t ON t.id = dt.theme_id
+         WHERE dt.dump_id = ? ORDER BY dt.rowid`
+      )
+      .all(dumpId) as ThemeRow[]
+    return rows.map(toTheme)
+  }
+
   /** Every document this dump was filed into: created from it OR appended to. */
   docsForDump(dumpId: number): Array<Doc & { action: 'created' | 'appended' }> {
     const rows = this.db
@@ -528,6 +564,11 @@ export class LitterDb {
     this.db
       .prepare('UPDATE agent_sessions SET sdk_session_id = ? WHERE id = ?')
       .run(sdkSessionId, id)
+  }
+
+  /** Continuing a finished session makes it live again (drives the busy state). */
+  reopenSession(id: number): void {
+    this.db.prepare('UPDATE agent_sessions SET finished_at = NULL, error = NULL WHERE id = ?').run(id)
   }
 
   finishSession(id: number, summary: string | null, error: string | null): void {

@@ -6,8 +6,8 @@ import { query, createSdkMcpServer } from '@anthropic-ai/claude-agent-sdk'
 import type { Options, SDKMessage, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk'
 import type { LitterDb } from '../db'
 import { InteractionRegistry } from './interactions'
-import { buildKeplerTools } from './tools'
-import { KEPLER_ASK_PROMPT, KEPLER_CHAT_PROMPT, KEPLER_DUMP_PROMPT } from './prompts'
+import { buildLitterTools } from './tools'
+import { LITTER_ASK_PROMPT, LITTER_CHAT_PROMPT, LITTER_DUMP_PROMPT } from './prompts'
 import { anchorQuote, parseAnswer } from '@shared/citations'
 import { dayLabel } from '@shared/blocks'
 import type { AgentEvent, AnsweredSource } from '@shared/types'
@@ -120,11 +120,11 @@ export class AgentService {
       interactions: this.interactions,
       emit: (ev: AgentEvent) => this.emit(ev)
     }
-    const keplerTools = buildKeplerTools(ctx)
+    const litterTools = buildLitterTools(ctx)
     const server = createSdkMcpServer({
       name: 'litter',
       version: '1.0.0',
-      tools: keplerTools
+      tools: litterTools
     })
     const abort = new AbortController()
     const options: Options = {
@@ -135,7 +135,7 @@ export class AgentService {
       // server, so it can never touch anything outside the app's own data.
       tools: [],
       mcpServers: { litter: server },
-      allowedTools: keplerTools.map((t) => `mcp__litter__${t.name}`),
+      allowedTools: litterTools.map((t) => `mcp__litter__${t.name}`),
       permissionMode: 'dontAsk',
       maxTurns: 40,
       persistSession: true,
@@ -225,7 +225,7 @@ export class AgentService {
     this.db.addMessage(session.id, 'user', dump.content)
     this.emit({ type: 'session', sessionId: session.id, dumpId, kind: 'process_dump' })
 
-    const options = this.baseOptions(session.id, dumpId, KEPLER_DUMP_PROMPT)
+    const options = this.baseOptions(session.id, dumpId, LITTER_DUMP_PROMPT)
     const queue = new MessageQueue()
     this.running.set(session.id, { queue, abort: options.abortController! })
     queue.push(
@@ -253,7 +253,7 @@ export class AgentService {
     this.db.addMessage(session.id, 'user', questionText)
     this.emit({ type: 'session', sessionId: session.id, dumpId: null, kind: 'ask' })
 
-    const options = this.baseOptions(session.id, null, KEPLER_ASK_PROMPT)
+    const options = this.baseOptions(session.id, null, LITTER_ASK_PROMPT)
     void this.run(session.id, null, options, questionText, (finalText, error) => {
       if (error) {
         this.db.finishSession(session.id, null, error)
@@ -318,8 +318,10 @@ export class AgentService {
   private continueSession(sessionId: number, text: string): void {
     const session = this.db.getSession(sessionId)
     if (!session) return
-    const options = this.baseOptions(sessionId, session.dumpId, KEPLER_CHAT_PROMPT)
+    const options = this.baseOptions(sessionId, session.dumpId, LITTER_CHAT_PROMPT)
     if (session.sdkSessionId) options.resume = session.sdkSessionId
+    // the session is working again — the chat shows its indicator until 'done'
+    this.db.reopenSession(sessionId)
     const queue = new MessageQueue()
     this.running.set(sessionId, { queue, abort: options.abortController! })
     queue.push(text)

@@ -23,10 +23,12 @@ function themeIdFor(ctx: SessionCtx, themeName: string | undefined, create: bool
   const existing = ctx.db.getThemeByName(themeName)
   if (existing) return existing.id
   if (!create) return null
-  return ctx.db.createTheme(themeName).id
+  const created = ctx.db.createTheme(themeName)
+  if (ctx.dumpId != null) ctx.db.addThemeFiling(ctx.dumpId, created.id)
+  return created.id
 }
 
-export function buildKeplerTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<any>> {
+export function buildLitterTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<any>> {
   const changed = (): void => ctx.emit({ type: 'data_changed', sessionId: ctx.sessionId })
 
   return [
@@ -58,6 +60,7 @@ export function buildKeplerTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
       async ({ name, description }) => {
         const t = ctx.db.createTheme(name, description)
         ctx.db.updateTheme(t.id, { description })
+        if (ctx.dumpId != null) ctx.db.addThemeFiling(ctx.dumpId, t.id)
         changed()
         return text(`Thema "${t.name}" angelegt (id ${t.id}).`)
       }
