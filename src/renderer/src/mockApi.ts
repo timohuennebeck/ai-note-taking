@@ -269,6 +269,12 @@ export const mockApi: LitterApi = {
     }, 900)
     return { dumpId, sessionId }
   },
+  async retryDump(dumpId) {
+    const sessionId = nextId++
+    const item = feed.find((f) => f.dumpId === dumpId)
+    if (item) item.status = 'processing'
+    return { sessionId }
+  },
   async ask(_question) {
     const sessionId = nextId++
     setTimeout(() => {

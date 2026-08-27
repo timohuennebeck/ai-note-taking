@@ -235,7 +235,23 @@ function FeedRow({ item }: { item: FeedItem }): ReactElement {
             )}
           </span>
         ) : item.status === 'failed' ? (
-          <span style={{ fontSize: 11.5, color: 'var(--accent)' }}>Ablage fehlgeschlagen — antippen für Details</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span
+              onClick={(e) => {
+                e.stopPropagation()
+                void api.retryDump(item.dumpId).then(refresh)
+              }}
+              style={{ fontSize: 11.5, color: 'var(--accent)', cursor: 'pointer', fontWeight: 500 }}
+            >
+              Ablage fehlgeschlagen — erneut versuchen
+            </span>
+            <span
+              onClick={() => void openChatForDump(item.dumpId)}
+              style={{ fontSize: 11.5, color: 'var(--faint)', cursor: 'pointer' }}
+            >
+              Details
+            </span>
+          </span>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 11.5, color: 'var(--ghost)', flex: 'none' }}>

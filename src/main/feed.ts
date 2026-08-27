@@ -90,6 +90,13 @@ export function buildThread(db: LitterDb, sessionId: number): ThreadEntry[] {
       }
     }
   }
+  // Failed sessions: surface the stored error so "antippen für Details" shows it.
+  if (session.error) {
+    entries.push({
+      type: 'agent',
+      text: `⚠️ Ablage fehlgeschlagen: ${session.error}\n\nDer Roh-Dump ist gespeichert — im Feed auf „erneut versuchen“ tippen.`
+    })
+  }
   // Filed summary card: show the first document created from this dump.
   if (session.dumpId != null && session.finishedAt && !session.error) {
     const docs = db.docsForDump(session.dumpId)

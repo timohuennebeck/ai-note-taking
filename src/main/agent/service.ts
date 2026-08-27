@@ -81,6 +81,9 @@ export class AgentService {
     this.db = opts.db
     this.libraryDir = opts.libraryDir
     this.emitCb = opts.emit
+    // The SDK subprocess is spawned with cwd = libraryDir; a missing cwd makes
+    // spawn fail with a misleading ENOENT on the executable path.
+    fs.mkdirSync(this.libraryDir, { recursive: true })
   }
 
   private emit(ev: AgentEvent): void {
@@ -117,10 +120,11 @@ export class AgentService {
       interactions: this.interactions,
       emit: (ev: AgentEvent) => this.emit(ev)
     }
+    const keplerTools = buildKeplerTools(ctx)
     const server = createSdkMcpServer({
       name: 'litter',
       version: '1.0.0',
-      tools: buildKeplerTools(ctx)
+      tools: keplerTools
     })
     const abort = new AbortController()
     const options: Options = {
@@ -131,7 +135,7 @@ export class AgentService {
       // server, so it can never touch anything outside the app's own data.
       tools: [],
       mcpServers: { litter: server },
-      allowedTools: ['mcp__litter__*'],
+      allowedTools: keplerTools.map((t) => `mcp__litter__${t.name}`),
       permissionMode: 'dontAsk',
       maxTurns: 40,
       persistSession: true,

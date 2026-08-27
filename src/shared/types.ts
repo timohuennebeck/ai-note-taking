@@ -146,6 +146,8 @@ export type AgentEvent =
 
 export interface LitterApi {
   createDump(content: string): Promise<{ dumpId: number; sessionId: number }>
+  /** re-run agent processing for a failed dump */
+  retryDump(dumpId: number): Promise<{ sessionId: number }>
   ask(question: string): Promise<{ sessionId: number }>
   /** answer a pending agent question (picked chip or typed text) */
   answerQuestion(sessionId: number, questionId: string, answer: string): Promise<void>

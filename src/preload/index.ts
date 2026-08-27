@@ -6,6 +6,7 @@ const invoke = (channel: string, ...args: unknown[]): Promise<never> =>
 
 const api: LitterApi = {
   createDump: (content) => invoke('dump:create', content),
+  retryDump: (dumpId) => invoke('dump:retry', dumpId),
   ask: (question) => invoke('ask', question),
   answerQuestion: (sessionId, questionId, answer) =>
     invoke('agent:answerQuestion', sessionId, questionId, answer),

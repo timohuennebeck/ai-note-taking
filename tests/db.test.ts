@@ -90,6 +90,20 @@ describe('feed + thread', () => {
     expect(feed[0].pendingQuestions).toBe(1)
   })
 
+  it('surfaces the stored session error in the thread', () => {
+    const dump = db.createDump('Gehaltstransparenz besprochen')
+    const session = db.createSession('process_dump', dump.id)
+    db.addMessage(session.id, 'user', dump.content)
+    db.setDumpStatus(dump.id, 'failed')
+    db.finishSession(session.id, null, 'Failed to spawn Claude Code process')
+
+    const thread = buildThread(db, session.id)
+    expect(thread.map((t) => t.type)).toEqual(['user', 'agent'])
+    expect(thread[1]).toMatchObject({ type: 'agent' })
+    expect((thread[1] as { text: string }).text).toContain('Failed to spawn Claude Code process')
+    expect(buildFeed(db)[0].status).toBe('failed')
+  })
+
   it('reconstructs a full thread with question, proposal and filed card', () => {
     const dump = db.createDump('Hero-Zeile testen')
     const session = db.createSession('process_dump', dump.id)

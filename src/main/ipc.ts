@@ -16,6 +16,7 @@ export function registerIpc(db: LitterDb, agent: Agent): void {
     const { sessionId } = agent.processDump(dump.id)
     return { dumpId: dump.id, sessionId }
   })
+  h('dump:retry', (dumpId: number) => agent.processDump(dumpId))
   h('ask', (question: string) => agent.ask(question))
   h('agent:answerQuestion', (sessionId: number, questionId: string, answer: string) =>
     agent.answerQuestion(sessionId, questionId, answer)
