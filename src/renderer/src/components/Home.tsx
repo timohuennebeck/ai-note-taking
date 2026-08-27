@@ -143,7 +143,7 @@ function AskResult(): ReactElement | null {
       </div>
       {ask.pending ? (
         <div className="kepler-pending" style={{ fontSize: 13, marginTop: 14 }}>
-          Kepler liest deine Notizen …
+          Kepler liest deine Unterlagen …
         </div>
       ) : (
         <>

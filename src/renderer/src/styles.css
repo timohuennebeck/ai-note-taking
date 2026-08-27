@@ -7,6 +7,7 @@ body {
   --active: #E9E5DD; --ring: rgba(26,25,23,0.07); --ring2: #E6E2DA; --groupbg: #F1EEE7;
   --accent: #C0603C; --accent-ink: #FFFFFF; --tint: #FBF3EF; --sendidle: #F1EEE8;
   --scrim: rgba(26,25,23,0.16); --avatar: #E2DDD3; --avatar-ink: #6E6A61;
+  --highlight: #F3D4A9;
   --shadow: 0 20px 50px rgba(26,25,23,0.14); --cardshadow: 0 4px 14px rgba(26,25,23,0.05);
   font-family: -apple-system, 'Helvetica Neue', 'Segoe UI', sans-serif;
   color: var(--ink);
@@ -20,6 +21,7 @@ body.dark {
   --active: #302E2B; --ring: rgba(236,234,230,0.09); --ring2: #34322E; --groupbg: #262523;
   --accent: #D07A55; --accent-ink: #201F1D; --tint: #33261F; --sendidle: #302E2B;
   --scrim: rgba(0,0,0,0.45); --avatar: #3A3833; --avatar-ink: #B8B4AC;
+  --highlight: #5C4023;
   --shadow: 0 20px 50px rgba(0,0,0,0.5); --cardshadow: 0 4px 14px rgba(0,0,0,0.2);
 }
 
@@ -56,7 +58,8 @@ input::placeholder, textarea::placeholder { color: var(--faint); }
 .no-drag { -webkit-app-region: no-drag; }
 
 .note-highlight {
-  background: var(--tint);
-  box-shadow: 0 0 0 2px var(--tint);
+  background: var(--highlight);
+  box-shadow: 0 0 0 2px var(--highlight);
   border-radius: 3px;
+  color: var(--ink);
 }
