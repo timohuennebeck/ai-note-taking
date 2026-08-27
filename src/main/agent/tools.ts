@@ -28,6 +28,50 @@ function themeIdFor(ctx: SessionCtx, themeName: string | undefined, create: bool
   return created.id
 }
 
+/**
+ * Show a confirmation card and wait for the user. Destructive tools call this
+ * themselves, so nothing can be deleted without an explicit click — regardless
+ * of what the model decides to do.
+ */
+async function confirmWithUser(
+  ctx: SessionCtx,
+  args: { summary: string; rows: ProposalRow[]; confirmLabel: string; danger?: boolean }
+): Promise<boolean> {
+  const proposalId = randomUUID()
+  const payload = {
+    t: 'proposal',
+    id: proposalId,
+    text: args.summary,
+    rows: args.rows,
+    danger: !!args.danger,
+    confirmLabel: args.confirmLabel
+  }
+  const msg = ctx.db.addMessage(
+    ctx.sessionId,
+    'tool_use',
+    JSON.stringify({ ...payload, state: 'open', committedAt: null })
+  )
+  ctx.emit({
+    type: 'proposal',
+    sessionId: ctx.sessionId,
+    proposalId,
+    text: args.summary,
+    rows: args.rows,
+    danger: !!args.danger,
+    confirmLabel: args.confirmLabel
+  })
+  const accepted = await ctx.interactions.waitForProposal(ctx.sessionId, proposalId)
+  ctx.db.updateMessageContent(
+    msg.id,
+    JSON.stringify({
+      ...payload,
+      state: accepted ? 'accepted' : 'rejected',
+      committedAt: accepted ? new Date().toISOString() : null
+    })
+  )
+  return accepted
+}
+
 export function buildLitterTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<any>> {
   const changed = (): void => ctx.emit({ type: 'data_changed', sessionId: ctx.sessionId })
 
@@ -238,6 +282,78 @@ export function buildLitterTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
     ),
 
     tool(
+      'delete_documents',
+      'Löscht Dokumente. Entweder bestimmte per document_ids oder ALLE mit all=true. Der Nutzer muss in der App bestätigen — frage vorher nicht extra nach, dieses Werkzeug zeigt die Rückfrage selbst.',
+      {
+        document_ids: z.array(z.number()).optional(),
+        all: z.boolean().optional().describe('true löscht alle Dokumente')
+      },
+      async ({ document_ids, all }) => {
+        const targets = all
+          ? ctx.db.listDocs(null)
+          : (document_ids ?? []).map((id) => ctx.db.getDoc(id)).filter((d): d is NonNullable<typeof d> => !!d)
+        if (!targets.length) return text('Es gibt nichts zu löschen.')
+        const shown = targets.slice(0, 8).map((d) => d.title)
+        const rows: ProposalRow[] = [
+          { label: 'Löschen', value: `${targets.length} ${targets.length === 1 ? 'Dokument' : 'Dokumente'}` },
+          { label: 'Betroffen', value: shown.join(', ') + (targets.length > shown.length ? ` und ${targets.length - shown.length} weitere` : '') },
+          { label: 'Hinweis', value: 'Die Roh-Dumps bleiben erhalten, nur die Dokumente verschwinden.' }
+        ]
+        const ok = await confirmWithUser(ctx, {
+          summary: all ? 'Das löscht alle Dokumente. Sicher?' : 'Diese Dokumente löschen?',
+          rows,
+          confirmLabel: 'Endgültig löschen',
+          danger: true
+        })
+        if (!ok) return text('Abgebrochen — es wurde nichts gelöscht.')
+        const n = ctx.db.deleteDocs(targets.map((d) => d.id))
+        changed()
+        return text(`${n} ${n === 1 ? 'Dokument' : 'Dokumente'} gelöscht.`)
+      }
+    ),
+
+    tool(
+      'delete_themes',
+      'Löscht Themen. Entweder bestimmte per theme_ids oder ALLE mit all=true. Standardmäßig bleiben die Dokumente erhalten und stehen dann ohne Thema da; mit with_documents=true werden sie mitgelöscht. Der Nutzer bestätigt in der App — dieses Werkzeug zeigt die Rückfrage selbst.',
+      {
+        theme_ids: z.array(z.number()).optional(),
+        all: z.boolean().optional().describe('true löscht alle Themen'),
+        with_documents: z.boolean().optional().describe('true löscht auch die Dokumente darin')
+      },
+      async ({ theme_ids, all, with_documents }) => {
+        const targets = all
+          ? ctx.db.listThemes()
+          : (theme_ids ?? []).map((id) => ctx.db.getTheme(id)).filter((t): t is NonNullable<typeof t> => !!t)
+        if (!targets.length) return text('Es gibt nichts zu löschen.')
+        const docCount = targets.reduce((sum, t) => sum + t.docCount, 0)
+        const shown = targets.slice(0, 8).map((t) => t.name)
+        const rows: ProposalRow[] = [
+          { label: 'Löschen', value: `${targets.length} ${targets.length === 1 ? 'Thema' : 'Themen'}` },
+          { label: 'Betroffen', value: shown.join(', ') + (targets.length > shown.length ? ` und ${targets.length - shown.length} weitere` : '') },
+          {
+            label: 'Dokumente',
+            value: with_documents
+              ? `${docCount} Dokumente werden mitgelöscht`
+              : `${docCount} Dokumente bleiben erhalten, dann ohne Thema`
+          }
+        ]
+        const ok = await confirmWithUser(ctx, {
+          summary: all ? 'Das löscht alle Themen. Sicher?' : 'Diese Themen löschen?',
+          rows,
+          confirmLabel: 'Endgültig löschen',
+          danger: true
+        })
+        if (!ok) return text('Abgebrochen — es wurde nichts gelöscht.')
+        const res = ctx.db.deleteThemes(targets.map((t) => t.id), !!with_documents)
+        changed()
+        return text(
+          `${res.themes} ${res.themes === 1 ? 'Thema' : 'Themen'} gelöscht` +
+            (with_documents ? `, dazu ${res.docs} Dokumente.` : '. Die Dokumente sind jetzt ohne Thema.')
+        )
+      }
+    ),
+
+    tool(
       'ask_user',
       'Stellt dem Nutzer EINE kurze Rückfrage mit 2-3 Antwort-Optionen und wartet auf die Antwort. Der Nutzer kann auch frei antworten.',
       {
@@ -273,31 +389,11 @@ export function buildLitterTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
           .max(6)
       },
       async ({ summary, rows }) => {
-        const proposalId = randomUUID()
-        const msg = ctx.db.addMessage(
-          ctx.sessionId,
-          'tool_use',
-          JSON.stringify({ t: 'proposal', id: proposalId, text: summary, rows, state: 'open', committedAt: null })
-        )
-        ctx.emit({
-          type: 'proposal',
-          sessionId: ctx.sessionId,
-          proposalId,
-          text: summary,
-          rows: rows as ProposalRow[]
+        const accepted = await confirmWithUser(ctx, {
+          summary,
+          rows: rows as ProposalRow[],
+          confirmLabel: 'Passt, ablegen'
         })
-        const accepted = await ctx.interactions.waitForProposal(ctx.sessionId, proposalId)
-        ctx.db.updateMessageContent(
-          msg.id,
-          JSON.stringify({
-            t: 'proposal',
-            id: proposalId,
-            text: summary,
-            rows,
-            state: accepted ? 'accepted' : 'rejected',
-            committedAt: accepted ? new Date().toISOString() : null
-          })
-        )
         return text(accepted ? 'accepted — der Nutzer hat bestätigt. Lege jetzt ab.' : 'rejected — der Nutzer möchte es anders. Frage nach.')
       }
     )

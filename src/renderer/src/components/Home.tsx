@@ -225,6 +225,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
     >
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
         <span style={{ fontSize: 13, lineHeight: 1.5 }}>{item.text}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 22 }}>
         {pending ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {item.pendingQuestions > 0 ? (
@@ -366,33 +367,34 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElemen
             ))}
           </div>
         )}
+          <span style={{ flex: 1 }} />
+          <span
+            className="litter-row-menu hover-bg2"
+            onClick={(e) => {
+              e.stopPropagation()
+              setRowMenu(!rowMenu)
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 22,
+              height: 22,
+              flex: 'none',
+              borderRadius: 6,
+              color: 'var(--faint)',
+              cursor: 'pointer',
+              opacity: rowMenu ? 1 : undefined
+            }}
+          >
+            <Icon name="ellipsis-horizontal" size={14} />
+          </span>
+        </div>
       </div>
       <span
         style={{ fontSize: 11, color: 'var(--ghost)', flex: 'none', paddingTop: 3, fontVariantNumeric: 'tabular-nums' }}
       >
         {fresh ? 'gerade' : item.time}
-      </span>
-      <span
-        className="litter-row-menu hover-bg2"
-        onClick={(e) => {
-          e.stopPropagation()
-          setRowMenu(!rowMenu)
-        }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 22,
-          height: 22,
-          flex: 'none',
-          marginTop: -1,
-          borderRadius: 6,
-          color: 'var(--faint)',
-          cursor: 'pointer',
-          opacity: rowMenu ? 1 : undefined
-        }}
-      >
-        <Icon name="ellipsis-horizontal" size={14} />
       </span>
       {rowMenu && (
         <div

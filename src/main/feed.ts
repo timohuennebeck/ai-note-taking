@@ -86,7 +86,9 @@ export function buildThread(db: LitterDb, sessionId: number): ThreadState {
             rows: p.rows ?? [],
             proposalId: p.id,
             state: p.state ?? 'open',
-            committedAt: p.committedAt ? timeLabel(p.committedAt) : null
+            committedAt: p.committedAt ? timeLabel(p.committedAt) : null,
+            danger: !!p.danger,
+            confirmLabel: p.confirmLabel
           })
         } else if (p.t === 'answer') {
           entries.push({ type: 'agent', text: p.text })

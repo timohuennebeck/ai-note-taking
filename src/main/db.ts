@@ -422,6 +422,39 @@ export class LitterDb {
     this.db.prepare('DELETE FROM notes WHERE id = ?').run(id)
   }
 
+  /** Delete many documents at once. Returns how many were removed. */
+  deleteDocs(ids: number[]): number {
+    if (!ids.length) return 0
+    const stmt = this.db.prepare('DELETE FROM notes WHERE id = ?')
+    const tx = this.db.transaction((list: number[]) => {
+      let n = 0
+      for (const id of list) n += stmt.run(id).changes
+      return n
+    })
+    return tx(ids) as number
+  }
+
+  /**
+   * Delete themes. Their documents survive by default and end up without a
+   * theme (the FK is ON DELETE SET NULL); pass withDocuments to remove those
+   * documents as well.
+   */
+  deleteThemes(ids: number[], withDocuments = false): { themes: number; docs: number } {
+    if (!ids.length) return { themes: 0, docs: 0 }
+    const delDocs = this.db.prepare('DELETE FROM notes WHERE theme_id = ?')
+    const delTheme = this.db.prepare('DELETE FROM themes WHERE id = ?')
+    const tx = this.db.transaction((list: number[]) => {
+      let themes = 0
+      let docs = 0
+      for (const id of list) {
+        if (withDocuments) docs += delDocs.run(id).changes
+        themes += delTheme.run(id).changes
+      }
+      return { themes, docs }
+    })
+    return tx(ids) as { themes: number; docs: number }
+  }
+
   searchDocs(query: string, limit = 12): Array<Doc & { snippet: string }> {
     // Escape the FTS query: quote each term to avoid syntax errors on user input.
     const safe = query

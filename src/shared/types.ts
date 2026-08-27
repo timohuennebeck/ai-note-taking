@@ -126,6 +126,9 @@ export type ThreadEntry =
       proposalId: string
       state: 'open' | 'accepted' | 'rejected'
       committedAt: string | null
+      /** destructive confirmation — rendered as a warning with a red button */
+      danger?: boolean
+      confirmLabel?: string
     }
   | { type: 'filed'; text: string; noteId: number | null; docTitle: string | null; docDate: string | null; docLines: string[] }
 
@@ -143,7 +146,15 @@ export type AgentEvent =
   | { type: 'thinking'; sessionId: number }
   | { type: 'agent_text'; sessionId: number; text: string }
   | { type: 'question'; sessionId: number; questionId: string; text: string; options: string[] }
-  | { type: 'proposal'; sessionId: number; proposalId: string; text: string; rows: ProposalRow[] }
+  | {
+      type: 'proposal'
+      sessionId: number
+      proposalId: string
+      text: string
+      rows: ProposalRow[]
+      danger?: boolean
+      confirmLabel?: string
+    }
   | { type: 'filed'; sessionId: number; dumpId: number | null; summary: string }
   | { type: 'answer'; sessionId: number; text: string; sources: AnsweredSource[] }
   | { type: 'data_changed'; sessionId: number }

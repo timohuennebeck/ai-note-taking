@@ -144,7 +144,7 @@ export class FakeAgentService {
     }
     this.emit({ type: 'data_changed', sessionId })
 
-    const summary = `Abgelegt in „${doc.title}“ (${themeRow.name}). Der Roh-Dump bleibt unverändert.`
+    const summary = `Abgelegt in ${doc.title} unter ${themeRow.name}. Der Roh-Dump bleibt unverändert.`
     this.db.addMessage(sessionId, 'assistant', summary)
     this.db.setDumpStatus(dumpId, 'processed')
     this.db.finishSession(sessionId, summary, null)
@@ -174,7 +174,7 @@ export class FakeAgentService {
         }
       })
       const text = docs.length
-        ? `Dazu habe ich ${docs.length === 1 ? 'eine Notiz' : `${docs.length} Notizen`} gefunden — am ehesten passt „${docs[0].title}“.`
+        ? `Dazu habe ich ${docs.length === 1 ? 'eine Notiz' : `${docs.length} Notizen`} gefunden — am ehesten passt ${docs[0].title}.`
         : 'Dazu steht noch nichts in deinen Notizen.'
       this.db.addMessage(session.id, 'tool_use', JSON.stringify({ t: 'answer', text, sources }))
       this.db.finishSession(session.id, text, null)
@@ -196,8 +196,67 @@ export class FakeAgentService {
 
   sendChatMessage(sessionId: number, text: string): void {
     this.db.addMessage(sessionId, 'user', text)
+    if (/löschen|loeschen|entfernen/i.test(text)) {
+      void this.scriptDelete(sessionId, /theme|thema|themen/i.test(text))
+      return
+    }
     const reply = 'Verstanden — im Demo-Modus kann ich darauf nur begrenzt eingehen.'
     this.db.addMessage(sessionId, 'assistant', reply)
+    this.emit({ type: 'agent_text', sessionId, text: reply })
+    this.emit({ type: 'done', sessionId })
+  }
+
+  /** Demo counterpart of delete_documents / delete_themes, incl. confirmation. */
+  private async scriptDelete(sessionId: number, themesToo: boolean): Promise<void> {
+    this.db.reopenSession(sessionId)
+    const docs = this.db.listDocs(null)
+    const themes = this.db.listThemes()
+    const pid = randomUUID()
+    const rows = [
+      { label: 'Löschen', value: `${docs.length} Dokumente${themesToo ? `, ${themes.length} Themen` : ''}` },
+      { label: 'Hinweis', value: 'Die Roh-Dumps bleiben erhalten.' }
+    ]
+    const payload = {
+      t: 'proposal',
+      id: pid,
+      text: 'Das löscht alles. Sicher?',
+      rows,
+      danger: true,
+      confirmLabel: 'Endgültig löschen'
+    }
+    const msg = this.db.addMessage(
+      sessionId,
+      'tool_use',
+      JSON.stringify({ ...payload, state: 'open', committedAt: null })
+    )
+    this.emit({
+      type: 'proposal',
+      sessionId,
+      proposalId: pid,
+      text: payload.text,
+      rows,
+      danger: true,
+      confirmLabel: payload.confirmLabel
+    })
+    const accepted = await this.interactions.waitForProposal(sessionId, pid)
+    this.db.updateMessageContent(
+      msg.id,
+      JSON.stringify({
+        ...payload,
+        state: accepted ? 'accepted' : 'rejected',
+        committedAt: accepted ? new Date().toISOString() : null
+      })
+    )
+    let reply = 'Abgebrochen — es wurde nichts gelöscht.'
+    if (accepted) {
+      const n = this.db.deleteDocs(docs.map((d) => d.id))
+      let t = 0
+      if (themesToo) t = this.db.deleteThemes(themes.map((x) => x.id)).themes
+      reply = `${n} Dokumente${themesToo ? ` und ${t} Themen` : ''} gelöscht.`
+      this.emit({ type: 'data_changed', sessionId })
+    }
+    this.db.addMessage(sessionId, 'assistant', reply)
+    this.db.finishSession(sessionId, reply, null)
     this.emit({ type: 'agent_text', sessionId, text: reply })
     this.emit({ type: 'done', sessionId })
   }

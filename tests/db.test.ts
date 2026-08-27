@@ -124,6 +124,38 @@ describe('LitterDb', () => {
     expect(db.searchDocs('Frust')[0].id).toBe(doc.id)
   })
 
+  it('deletes documents in bulk without touching the raw dumps', () => {
+    const dump = db.createDump('Sprint und Zahnarzt')
+    const a = db.createDoc({ title: 'Sprint', content: '- x', dumpId: dump.id })
+    const b = db.createDoc({ title: 'Zahnarzt', content: '- y', dumpId: dump.id })
+
+    expect(db.deleteDocs([a.id, b.id])).toBe(2)
+    expect(db.listDocs(null)).toHaveLength(0)
+    expect(db.searchDocs('Sprint')).toHaveLength(0)
+    // the dump itself is untouched
+    expect(db.getDump(dump.id)?.content).toBe('Sprint und Zahnarzt')
+  })
+
+  it('deletes themes and keeps their documents unless asked otherwise', () => {
+    const theme = db.createTheme('EmaBoard')
+    const doc = db.createDoc({ title: 'Sprint', content: '- x', themeId: theme.id })
+
+    expect(db.deleteThemes([theme.id])).toEqual({ themes: 1, docs: 0 })
+    expect(db.listThemes()).toHaveLength(0)
+    expect(db.getDoc(doc.id)).toMatchObject({ title: 'Sprint', themeId: null, themeName: null })
+
+    const other = db.createTheme('Familie')
+    db.createDoc({ title: 'Zahnarzt', content: '- y', themeId: other.id })
+    expect(db.deleteThemes([other.id], true)).toEqual({ themes: 1, docs: 1 })
+    expect(db.listDocs(null).map((d) => d.title)).toEqual(['Sprint'])
+  })
+
+  it('ignores unknown ids when deleting', () => {
+    expect(db.deleteDocs([])).toBe(0)
+    expect(db.deleteDocs([999])).toBe(0)
+    expect(db.deleteThemes([999])).toEqual({ themes: 0, docs: 0 })
+  })
+
   it('stores todos with theme and due label', () => {
     const theme = db.createTheme('Familie')
     const todo = db.createTodo({ text: 'Zahnarzt anrufen', dueLabel: 'Fr, 16 Uhr', themeId: theme.id })

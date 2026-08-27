@@ -12,6 +12,7 @@ Built from the design **“Dump v10 Ohne Sidebar”** (Claude Design).
 - **Rückfragen** — when Litter is genuinely unsure it asks up to two short questions with option chips, then shows a filing proposal (Titel / Thema / Todo) that you confirm with *„Passt, ablegen“*. Confident filings happen silently; you can re-file from the feed at any time.
 - **Frage** — switch the capture field to *Frage* and ask your notes. Litter searches (SQLite FTS5), reads documents, and answers only from your notes. Every claim carries a citation `[source: note:ID "verbatim quote"]`; the app anchors the quote in the real document and shows *„Belegt durch“* chips — clicking one opens the document with the quoted passage highlighted. Citations that don't anchor are dropped, so hallucinated sources can't appear.
 - **Tastatur** — `U` opens Unterlagen, `T` Themen, `Esc` always returns to the home screen (never while you're typing).
+- **Löschen** — ask in the chat ("lösche alle Unterlagen und Themen") and Litter uses its delete tools. Those tools show a red confirmation card and **block until you press it**, so nothing is ever deleted by the model alone. Raw dumps are never deletable this way; deleting a theme keeps its documents unless you say otherwise.
 - **Verlauf** — the home feed *is* the history: every dump stays there with what it was filed into, a hover menu to reopen its conversation, retry a failed filing, or delete the entry (the documents survive). Conversations are persisted and resume via the Agent SDK's session ids.
 
 ## Stack
@@ -21,7 +22,7 @@ Built from the design **“Dump v10 Ohne Sidebar”** (Claude Design).
 | Shell | Electron + electron-vite, React 18, TypeScript |
 | Database | better-sqlite3 (WAL), FTS5 full-text index, local file in `~/Library/Application Support/Litter/` |
 | AI | `@anthropic-ai/claude-agent-sdk` in the main process — uses your **Claude subscription login**, no API key. No model is pinned, so the agent runs on whatever model your `claude` CLI defaults to |
-| Agent tools | In-process MCP server (`list_themes`, `create_document`, `append_to_document`, `create_todo`, `search_notes`, `ask_user`, `propose_filing`, …) |
+| Agent tools | In-process MCP server (`list_themes`, `create_document`, `append_to_document`, `create_todo`, `search_notes`, `delete_documents`, `delete_themes`, `ask_user`, `propose_filing`, …) |
 
 The agent gets **no built-in tools** (`tools: []`) — it can only act through the app's own MCP tools, so it can never touch anything outside the app's data. Inside Electron the SDK runtime is spawned with Electron's own binary (`ELECTRON_RUN_AS_NODE`), so no system Node is required.
 

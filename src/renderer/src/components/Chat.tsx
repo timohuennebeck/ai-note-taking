@@ -96,7 +96,9 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
             width: '100%',
             borderRadius: 11,
             background: 'var(--card)',
-            boxShadow: '0 0 0 1px var(--ring), var(--cardshadow)',
+            boxShadow: e.danger
+              ? '0 0 0 1px var(--accent), var(--cardshadow)'
+              : '0 0 0 1px var(--ring), var(--cardshadow)',
             padding: '13px 14px 12px'
           }}
         >
@@ -125,7 +127,7 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
                   cursor: 'pointer'
                 }}
               >
-                Passt, ablegen
+                {e.confirmLabel ?? 'Passt, ablegen'}
               </span>
               <span
                 className="hover-ink"
@@ -141,16 +143,24 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
                   cursor: 'pointer'
                 }}
               >
-                Korrigieren
+                {e.danger ? 'Abbrechen' : 'Korrigieren'}
               </span>
               <span style={{ flex: 1 }} />
-              <span style={{ fontSize: 11, color: 'var(--ghost)' }}>nichts ist bisher abgelegt</span>
+              <span style={{ fontSize: 11, color: e.danger ? 'var(--accent)' : 'var(--ghost)' }}>
+                {e.danger ? 'lässt sich nicht rückgängig machen' : 'nichts ist bisher abgelegt'}
+              </span>
+            </div>
+          )}
+          {e.state === 'rejected' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 13, fontSize: 11, color: 'var(--ghost)' }}>
+              von dir abgelehnt — nichts geändert
             </div>
           )}
           {e.state === 'accepted' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 13, fontSize: 11, color: 'var(--ghost)' }}>
               <Icon name="check-circle" size={13} style={{ color: 'var(--accent)' }} />
-              von dir bestätigt{e.committedAt ? ` ${e.committedAt} Uhr` : ''}
+              {e.danger ? 'von dir bestätigt' : 'von dir bestätigt'}
+              {e.committedAt ? ` ${e.committedAt} Uhr` : ''}
             </div>
           )}
         </div>
