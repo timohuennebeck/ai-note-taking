@@ -16,7 +16,6 @@ const api: LitterApi = {
   sendChatMessage: (sessionId, text) => invoke('agent:sendChat', sessionId, text),
 
   listFeed: (limit) => invoke('feed:list', limit),
-  listHistory: () => invoke('history:list'),
   getThread: (sessionId) => invoke('thread:get', sessionId),
   getSessionForDump: (dumpId) => invoke('session:forDump', dumpId),
 

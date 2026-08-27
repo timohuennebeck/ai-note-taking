@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactElement } from 'react'
+import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { DocGlyph, Icon, Starburst } from '../icons'
 import { chipCore, menuItem, menuStyle, modeBtn, serif } from '../ui'
 import { renderInline } from '../md'
@@ -183,9 +183,17 @@ function AskResult(): ReactElement | null {
   )
 }
 
-function FeedRow({ item }: { item: FeedItem }): ReactElement {
+function FeedRow({ item, last }: { item: FeedItem; last: boolean }): ReactElement {
   const { justSentDump, openChatForDump, themes, refresh, go } = useStore()
   const [menuFor, setMenuFor] = useState<number | null>(null)
+  const [rowMenu, setRowMenu] = useState(false)
+
+  useEffect(() => {
+    if (!rowMenu) return
+    const close = (): void => setRowMenu(false)
+    window.addEventListener('click', close)
+    return () => window.removeEventListener('click', close)
+  }, [rowMenu])
   const fresh = item.dumpId === justSentDump
   const pending = item.status === 'pending' || item.status === 'processing'
   const docParts = item.parts.filter((p) => p.kind === 'doc')
@@ -198,7 +206,7 @@ function FeedRow({ item }: { item: FeedItem }): ReactElement {
 
   return (
     <div
-      className="hover-bg"
+      className="hover-bg litter-row"
       onClick={() => void openChatForDump(item.dumpId)}
       style={{
         position: 'relative',
@@ -344,6 +352,70 @@ function FeedRow({ item }: { item: FeedItem }): ReactElement {
       >
         {fresh ? 'gerade' : item.time}
       </span>
+      <span
+        className="litter-row-menu hover-bg2"
+        onClick={(e) => {
+          e.stopPropagation()
+          setRowMenu(!rowMenu)
+        }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 22,
+          height: 22,
+          flex: 'none',
+          marginTop: -1,
+          borderRadius: 6,
+          color: 'var(--faint)',
+          cursor: 'pointer',
+          opacity: rowMenu ? 1 : undefined
+        }}
+      >
+        <Icon name="ellipsis-horizontal" size={14} />
+      </span>
+      {rowMenu && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{ ...menuStyle(last), left: 'auto', right: 6, width: 210 }}
+        >
+          <div
+            className="hover-bg"
+            onClick={() => {
+              setRowMenu(false)
+              void openChatForDump(item.dumpId)
+            }}
+            style={menuItem}
+          >
+            <Icon name="clock" size={12} style={{ color: 'var(--faint)' }} />
+            <span style={{ flex: 1 }}>Unterhaltung öffnen</span>
+          </div>
+          {item.status === 'failed' && (
+            <div
+              className="hover-bg"
+              onClick={() => {
+                setRowMenu(false)
+                void api.retryDump(item.dumpId).then(refresh)
+              }}
+              style={menuItem}
+            >
+              <Icon name="arrow-up" size={12} style={{ color: 'var(--faint)' }} />
+              <span style={{ flex: 1 }}>Erneut versuchen</span>
+            </div>
+          )}
+          <div
+            className="hover-bg"
+            onClick={() => {
+              setRowMenu(false)
+              void api.deleteDump(item.dumpId).then(refresh)
+            }}
+            style={{ ...menuItem, color: 'var(--accent)' }}
+          >
+            <Icon name="trash" size={12} />
+            <span style={{ flex: 1 }}>Aus Verlauf löschen</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -384,8 +456,8 @@ export function Home(): ReactElement {
           <AskResult />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minHeight: 0 }}>
-            {feed.map((item) => (
-              <FeedRow key={item.dumpId} item={item} />
+            {feed.map((item, i) => (
+              <FeedRow key={item.dumpId} item={item} last={i >= feed.length - 2 && feed.length > 2} />
             ))}
             {feed.length === 0 && (
               <div style={{ fontSize: 12.5, color: 'var(--faint)', textAlign: 'center', marginTop: 30 }}>

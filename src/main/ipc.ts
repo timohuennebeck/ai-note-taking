@@ -28,8 +28,7 @@ export function registerIpc(db: LitterDb, agent: Agent): void {
   h('agent:sendChat', (sessionId: number, text: string) => agent.sendChatMessage(sessionId, text))
   h('agent:authStatus', () => agent.getAuthStatus())
 
-  h('feed:list', (limit?: number) => buildFeed(db, limit ?? 30))
-  h('history:list', () => buildFeed(db, 200))
+  h('feed:list', (limit?: number) => buildFeed(db, limit ?? 200))
   h('thread:get', (sessionId: number) => buildThread(db, sessionId))
   h('session:forDump', (dumpId: number) => db.latestSessionForDump(dumpId)?.id ?? null)
 

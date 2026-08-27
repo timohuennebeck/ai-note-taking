@@ -2,7 +2,7 @@ import type { LitterDb } from './db'
 import { previewLines, timeLabel, dayLabel } from '@shared/blocks'
 import type { FeedItem, FilingPart, ThreadEntry, ThreadState } from '@shared/types'
 
-/** Rows for the home feed and the Historie view. */
+/** Rows for the home feed — the dump history lives there. */
 export function buildFeed(db: LitterDb, limit = 30): FeedItem[] {
   return db.listDumps(limit).map((dump) => {
     const session = db.latestSessionForDump(dump.id)

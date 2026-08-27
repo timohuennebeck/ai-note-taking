@@ -167,7 +167,6 @@ export interface LitterApi {
   sendChatMessage(sessionId: number, text: string): Promise<void>
 
   listFeed(limit?: number): Promise<FeedItem[]>
-  listHistory(): Promise<FeedItem[]>
   getThread(sessionId: number): Promise<ThreadState>
   getSessionForDump(dumpId: number): Promise<number | null>
 

@@ -2,7 +2,6 @@ import { useState, type ReactElement } from 'react'
 import { TitleBar } from './components/TitleBar'
 import { Home } from './components/Home'
 import { Themen } from './components/Themen'
-import { Historie } from './components/Historie'
 import { Chat } from './components/Chat'
 import { Docs } from './components/Docs'
 import { NoteActions, NoteView } from './components/NoteView'
@@ -10,13 +9,6 @@ import { Icon } from './icons'
 import { segBtn, toolBtn } from './ui'
 import { api, useStore } from './state'
 import type { Doc } from '@shared/types'
-
-function todayLabel(): string {
-  const d = new Date()
-  const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
-  const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
-  return `${days[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]}`
-}
 
 export default function App(): ReactElement {
   const { view, go, back, docs, thread, refresh } = useStore()
@@ -36,9 +28,8 @@ export default function App(): ReactElement {
 
   const titles: Record<string, [string, string]> = {
     themen: ['Themen', ''],
-    today: ['Historie', ''],
     hist: ['Dump', chatState],
-    notes: ['Eingang', `${docs.length} ${docs.length === 1 ? 'Dokument' : 'Dokumente'}`],
+    notes: ['Unterlagen', `${docs.length} ${docs.length === 1 ? 'Dokument' : 'Dokumente'}`],
     filter: [
       view.themeName ?? 'Filter',
       `${docs.filter((d) => d.themeId === view.themeId).length} Dokumente`
@@ -84,36 +75,23 @@ export default function App(): ReactElement {
 
         {notHome && (
           <div style={{ height: 44, flex: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '0 20px' }}>
-            {v === 'note' && (
+            {(v === 'note' || v === 'hist') && (
               <>
                 <span
                   className="hover-ink"
-                  onClick={() => back()}
+                  onClick={() => (v === 'note' ? back() : go({ view: 'home' }))}
                   style={{ display: 'flex', alignItems: 'center', fontSize: 12.5, color: 'var(--muted)', cursor: 'pointer' }}
                 >
-                  Eingang
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--ghost)' }}>/</span>
-              </>
-            )}
-            {v === 'hist' && (
-              <>
-                <span
-                  className="hover-ink"
-                  onClick={() => go({ view: 'today' })}
-                  style={{ display: 'flex', alignItems: 'center', fontSize: 12.5, color: 'var(--muted)', cursor: 'pointer' }}
-                >
-                  Historie
+                  {v === 'note' ? 'Unterlagen' : 'Start'}
                 </span>
                 <span style={{ fontSize: 12, color: 'var(--ghost)' }}>/</span>
               </>
             )}
             <span style={{ fontSize: 13, fontWeight: 600 }}>{viewTitle}</span>
-            {v !== 'note' && v !== 'today' && viewMeta && (
+            {v !== 'note' && viewMeta && (
               <span style={{ fontSize: 12, color: 'var(--faint)' }}>{viewMeta}</span>
             )}
             <span style={{ flex: 1 }} />
-            {v === 'today' && <span style={{ fontSize: 12, color: 'var(--faint)' }}>{todayLabel()}</span>}
             {v === 'note' && (
               <>
                 <span style={{ fontSize: 12, color: 'var(--faint)' }}>
@@ -154,7 +132,6 @@ export default function App(): ReactElement {
 
         {v === 'home' && <Home />}
         {v === 'themen' && <Themen />}
-        {v === 'today' && <Historie />}
         {v === 'hist' && <Chat />}
         {isDocs && <Docs docsView={docsView} themeId={v === 'filter' ? view.themeId : undefined} />}
         {v === 'note' && view.noteId != null && (

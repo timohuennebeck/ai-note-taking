@@ -1,9 +1,21 @@
-import type { ReactElement } from 'react'
-import { Icon, Starburst } from '../icons'
-import { tab } from '../ui'
+import type { CSSProperties, ReactElement } from 'react'
+import { DocGlyph, Icon, Starburst } from '../icons'
+import { serif } from '../ui'
 import { useStore } from '../state'
 
 const isMac = navigator.userAgent.includes('Macintosh')
+
+/** Square icon button in the window bar — shared by nav and the theme toggle. */
+const barBtn = (active: boolean): CSSProperties => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 26,
+  height: 26,
+  borderRadius: 7,
+  cursor: 'pointer',
+  ...(active ? { background: 'var(--active)', color: 'var(--ink)' } : { color: 'var(--faint)' })
+})
 
 export function TitleBar(): ReactElement {
   const { view, go, dark, toggleDark } = useStore()
@@ -32,27 +44,11 @@ export function TitleBar(): ReactElement {
           <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#28C840', boxShadow: 'inset 0 0 0 0.5px rgba(0,0,0,0.15)' }} />
         </>
       )}
+
+      {/* Litter sits dead center of the window bar */}
       <span
         className="no-drag"
         onClick={() => go({ view: 'home' })}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          height: 28,
-          padding: '0 9px',
-          marginLeft: 6,
-          borderRadius: 7,
-          cursor: 'pointer'
-        }}
-      >
-        <Starburst size={13} />
-        <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 13, letterSpacing: '-0.3px', color: 'var(--ink)' }}>
-          Litter
-        </span>
-      </span>
-      <div
-        className="no-drag"
         style={{
           position: 'absolute',
           left: '50%',
@@ -60,36 +56,42 @@ export function TitleBar(): ReactElement {
           transform: 'translate(-50%, -50%)',
           display: 'flex',
           alignItems: 'center',
-          gap: 2
+          gap: 7,
+          height: 28,
+          padding: '0 9px',
+          borderRadius: 7,
+          cursor: 'pointer'
         }}
       >
-        <span className="hover-ink" onClick={() => go({ view: 'notes' })} style={tab(v === 'notes' || v === 'note' || v === 'filter')}>
-          <Icon name="inbox" size={14} />
-          Eingang
+        <Starburst size={14} />
+        <span style={{ fontFamily: serif, fontSize: 14, letterSpacing: '-0.3px', color: 'var(--ink)' }}>
+          Litter
         </span>
-        <span className="hover-ink" onClick={() => go({ view: 'themen' })} style={tab(v === 'themen')}>
-          <Icon name="folder-open" size={14} />
-          Themen
-        </span>
-        <span className="hover-ink" onClick={() => go({ view: 'today' })} style={tab(v === 'today' || v === 'hist')}>
-          <Icon name="clock" size={14} />
-          Historie
-        </span>
-      </div>
+      </span>
+
       <span style={{ flex: 1 }} />
+
       <span
         className="no-drag hover-bg"
+        title="Unterlagen"
+        onClick={() => go({ view: 'notes' })}
+        style={barBtn(v === 'notes' || v === 'note' || v === 'filter')}
+      >
+        <DocGlyph width={13} height={15} />
+      </span>
+      <span
+        className="no-drag hover-bg"
+        title="Themen"
+        onClick={() => go({ view: 'themen' })}
+        style={barBtn(v === 'themen')}
+      >
+        <Icon name="folder-open" size={15} />
+      </span>
+      <span
+        className="no-drag hover-bg"
+        title={dark ? 'Heller Modus' : 'Dunkler Modus'}
         onClick={toggleDark}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 26,
-          height: 26,
-          borderRadius: 7,
-          cursor: 'pointer',
-          ...(dark ? { color: 'var(--faint)' } : { background: 'var(--active)', color: 'var(--ink)' })
-        }}
+        style={barBtn(!dark)}
       >
         <Icon name={dark ? 'moon' : 'sun'} size={15} />
       </span>

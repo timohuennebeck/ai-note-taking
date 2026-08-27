@@ -344,9 +344,6 @@ export const mockApi: LitterApi = {
   async listFeed() {
     return feed
   },
-  async listHistory() {
-    return feed
-  },
   async getThread(sessionId) {
     const entries = threads[sessionId] ?? []
     const item = feed.find((f) => f.sessionId === sessionId)

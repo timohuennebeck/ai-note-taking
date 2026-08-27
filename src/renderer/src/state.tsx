@@ -26,7 +26,7 @@ export const api: LitterApi =
     ? (window as Window & { litter: LitterApi }).litter
     : mockApi
 
-export type ViewName = 'home' | 'themen' | 'today' | 'hist' | 'notes' | 'filter' | 'note'
+export type ViewName = 'home' | 'themen' | 'hist' | 'notes' | 'filter' | 'note'
 
 export interface ViewState {
   view: ViewName
