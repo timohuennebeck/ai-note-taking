@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { Icon } from '../icons'
 import { optChip } from '../ui'
+import { renderInline } from '../md'
 import { useStore } from '../state'
 import type { ThreadEntry } from '@shared/types'
 
@@ -64,7 +65,7 @@ function Entry({ e }: { e: ThreadEntry }): ReactElement | null {
   if (e.type === 'agent') {
     return body(
       <div style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--text2)', marginTop: 1, userSelect: 'text', whiteSpace: 'pre-wrap' }}>
-        {e.text}
+        {renderInline(e.text)}
       </div>
     )
   }

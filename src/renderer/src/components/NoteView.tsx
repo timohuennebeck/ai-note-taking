@@ -2,14 +2,15 @@ import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
 import { Icon } from '../icons'
 import { blockStyle, serif } from '../ui'
 import { api, useStore } from '../state'
+import { renderInline } from '../md'
 import { parseBlocks } from '@shared/blocks'
 import { dayLabel } from '@shared/blocks'
 import type { Doc } from '@shared/types'
 
 function withHighlight(text: string, quote: string | null): ReactNode {
-  if (!quote) return text
+  if (!quote) return renderInline(text)
   const idx = text.toLowerCase().indexOf(quote.toLowerCase())
-  if (idx < 0) return text
+  if (idx < 0) return renderInline(text)
   return (
     <>
       {text.slice(0, idx)}

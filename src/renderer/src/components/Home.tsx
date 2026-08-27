@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactElement } from 'react'
 import { DocGlyph, Icon, Starburst } from '../icons'
 import { chipCore, menuItem, menuStyle, modeBtn, serif } from '../ui'
+import { renderInline } from '../md'
 import { api, useStore } from '../state'
 import type { FeedItem } from '@shared/types'
 
@@ -130,6 +131,11 @@ function Capture(): ReactElement {
 function AskResult(): ReactElement | null {
   const { ask, go } = useStore()
   if (!ask) return null
+  // one chip per document — several quotes from the same note anchor
+  // the first one when clicked
+  const uniqueSources = ask.sources.filter(
+    (s, i) => ask.sources.findIndex((x) => x.noteId === s.noteId) === i
+  )
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', padding: '2px 2px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--muted)' }}>
@@ -142,12 +148,12 @@ function AskResult(): ReactElement | null {
       ) : (
         <>
           <div style={{ fontFamily: serif, fontSize: 18.5, lineHeight: 1.55, marginTop: 12, userSelect: 'text' }}>
-            {ask.text}
+            {renderInline(ask.text ?? '')}
           </div>
-          {ask.sources.length > 0 && (
+          {uniqueSources.length > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 20 }}>
               <span style={{ fontSize: 12, color: 'var(--faint)', marginRight: 2 }}>Belegt durch</span>
-              {ask.sources.map((s, i) => (
+              {uniqueSources.map((s, i) => (
                 <span
                   key={i}
                   className="hover-bg2"
