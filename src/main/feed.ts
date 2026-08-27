@@ -1,6 +1,6 @@
 import type { LitterDb } from './db'
 import { previewLines, timeLabel, dayLabel } from '@shared/blocks'
-import type { FeedItem, FilingPart, ThreadEntry } from '@shared/types'
+import type { FeedItem, FilingPart, ThreadEntry, ThreadState } from '@shared/types'
 
 /** Rows for the home feed and the Historie view. */
 export function buildFeed(db: LitterDb, limit = 30): FeedItem[] {
@@ -49,9 +49,9 @@ export function buildFeed(db: LitterDb, limit = 30): FeedItem[] {
 }
 
 /** Reconstruct the chat thread of a dump session from persisted messages. */
-export function buildThread(db: LitterDb, sessionId: number): ThreadEntry[] {
+export function buildThread(db: LitterDb, sessionId: number): ThreadState {
   const session = db.getSession(sessionId)
-  if (!session) return []
+  if (!session) return { entries: [], running: false }
   const entries: ThreadEntry[] = []
   const messages = db.listMessages(sessionId)
   let first = true
@@ -113,5 +113,5 @@ export function buildThread(db: LitterDb, sessionId: number): ThreadEntry[] {
       })
     }
   }
-  return entries
+  return { entries, running: !session.finishedAt }
 }

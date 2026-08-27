@@ -129,6 +129,13 @@ export type ThreadEntry =
     }
   | { type: 'filed'; text: string; noteId: number | null; docTitle: string | null; docDate: string | null; docLines: string[] }
 
+/** A thread plus whether its agent session is still working. */
+export interface ThreadState {
+  entries: ThreadEntry[]
+  /** session started but not finished — Kepler is still on it */
+  running: boolean
+}
+
 /* ---------- agent events streamed to the renderer ---------- */
 
 export type AgentEvent =
@@ -149,6 +156,8 @@ export interface LitterApi {
   createDump(content: string): Promise<{ dumpId: number; sessionId: number }>
   /** re-run agent processing for a failed dump */
   retryDump(dumpId: number): Promise<{ sessionId: number }>
+  /** remove a dump and its sessions from the history */
+  deleteDump(dumpId: number): Promise<void>
   ask(question: string): Promise<{ sessionId: number }>
   /** answer a pending agent question (picked chip or typed text) */
   answerQuestion(sessionId: number, questionId: string, answer: string): Promise<void>
@@ -159,7 +168,7 @@ export interface LitterApi {
 
   listFeed(limit?: number): Promise<FeedItem[]>
   listHistory(): Promise<FeedItem[]>
-  getThread(sessionId: number): Promise<ThreadEntry[]>
+  getThread(sessionId: number): Promise<ThreadState>
   getSessionForDump(dumpId: number): Promise<number | null>
 
   listThemes(): Promise<Theme[]>

@@ -63,3 +63,6 @@ input::placeholder, textarea::placeholder { color: var(--faint); }
   border-radius: 3px;
   color: var(--ink);
 }
+
+.litter-row-menu { opacity: 0; transition: opacity 0.12s ease; }
+.litter-row:hover .litter-row-menu { opacity: 1; }

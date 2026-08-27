@@ -44,14 +44,14 @@ export const modeBtn = (active: boolean): CSSProperties =>
   active
     ? {
         padding: '4px 11px',
-        borderRadius: 999,
+        borderRadius: 6,
         background: 'var(--card)',
         boxShadow: '0 0 0 1px var(--ring2)',
         fontSize: 12,
         fontWeight: 500,
         cursor: 'pointer'
       }
-    : { padding: '4px 11px', borderRadius: 999, fontSize: 12, color: 'var(--faint)', cursor: 'pointer' }
+    : { padding: '4px 11px', borderRadius: 6, fontSize: 12, color: 'var(--faint)', cursor: 'pointer' }
 
 export const optChip = (active: boolean): CSSProperties =>
   active

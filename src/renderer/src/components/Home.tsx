@@ -29,6 +29,11 @@ function Capture(): ReactElement {
     }
     void submit(text)
     setText('')
+    // hand focus back to the page: the dump is out of the user's hands now
+    if (ref.current) {
+      ref.current.style.height = 'auto'
+      ref.current.blur()
+    }
   }
 
   return (
@@ -88,7 +93,7 @@ function Capture(): ReactElement {
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
             <Icon name="plus" size={17} style={{ color: 'var(--muted)', cursor: 'pointer' }} />
-            <span style={{ display: 'flex', padding: 2, borderRadius: 999, background: 'var(--groupbg)', gap: 1 }}>
+            <span style={{ display: 'flex', padding: 2, borderRadius: 8, background: 'var(--groupbg)', gap: 1 }}>
               <span
                 onClick={() => {
                   setMode('dump')

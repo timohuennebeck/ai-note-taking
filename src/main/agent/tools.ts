@@ -165,6 +165,40 @@ export function buildKeplerTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
     ),
 
     tool(
+      'rename_document',
+      'Benennt ein Dokument um. Nutze das, wenn ein Titel nicht mehr passt — etwa nachdem du Inhalte zusammengeführt hast und ein umfassenderer Titel besser passt.',
+      { document_id: z.number(), title: z.string().describe('Neuer prägnanter Titel, 2-4 Wörter') },
+      async ({ document_id, title }) => {
+        const d = ctx.db.getDoc(document_id)
+        if (!d) return errText(`Dokument ${document_id} existiert nicht.`)
+        ctx.db.updateDoc(document_id, { title })
+        changed()
+        return text(`Dokument "${d.title}" heißt jetzt "${title}".`)
+      }
+    ),
+
+    tool(
+      'merge_documents',
+      'Führt ein Dokument in ein anderes über: hängt den Inhalt der Quelle an das Ziel an und löscht die Quelle. Danach ggf. rename_document nutzen, damit der Titel beide Inhalte abdeckt.',
+      {
+        source_document_id: z.number(),
+        target_document_id: z.number()
+      },
+      async ({ source_document_id, target_document_id }) => {
+        if (source_document_id === target_document_id) return errText('Quelle und Ziel sind identisch.')
+        const src = ctx.db.getDoc(source_document_id)
+        const dst = ctx.db.getDoc(target_document_id)
+        if (!src) return errText(`Dokument ${source_document_id} existiert nicht.`)
+        if (!dst) return errText(`Dokument ${target_document_id} existiert nicht.`)
+        if (src.content.trim()) ctx.db.appendToDoc(target_document_id, src.content.trim())
+        ctx.db.deleteDoc(source_document_id)
+        if (ctx.dumpId != null) ctx.db.addFiling(ctx.dumpId, target_document_id, 'appended')
+        changed()
+        return text(`"${src.title}" wurde in "${dst.title}" (id ${dst.id}) zusammengeführt und gelöscht.`)
+      }
+    ),
+
+    tool(
       'set_document_theme',
       'Verschiebt ein Dokument in ein anderes Thema.',
       { document_id: z.number(), theme_name: z.string() },

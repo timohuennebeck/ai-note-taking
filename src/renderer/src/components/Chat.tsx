@@ -206,14 +206,18 @@ export function Chat(): ReactElement {
   const [text, setText] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const el = scrollRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [thread, threadBusy])
-
   const hasOpenChoices = thread.some(
     (e) => (e.type === 'question' && e.answer == null) || (e.type === 'proposal' && e.state === 'open')
   )
+  // first pass over a fresh dump reads as filing, later turns as thinking
+  const filedYet = thread.some((e) => e.type === 'agent' || e.type === 'filed' || e.type === 'proposal')
+  const busy = threadBusy && !hasOpenChoices
+  const busyLabel = filedYet ? 'Kepler denkt nach …' : 'Kepler sortiert ein …'
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [thread, busy])
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
@@ -225,11 +229,11 @@ export function Chat(): ReactElement {
           {thread.map((e, i) => (
             <Entry key={i} e={e} />
           ))}
-          {threadBusy && (
+          {busy && (
             <div style={{ display: 'flex', gap: 10 }}>
               <KeplerAvatar />
               <span className="kepler-pending" style={{ fontSize: 13, marginTop: 2 }}>
-                Kepler denkt nach …
+                {busyLabel}
               </span>
             </div>
           )}

@@ -70,6 +70,31 @@ describe('LitterDb', () => {
     ])
   })
 
+  it('deletes a dump with its sessions and filings, keeping documents', () => {
+    const dump = db.createDump('Lass Frust Phase6 umbenennen')
+    const session = db.createSession('process_dump', dump.id)
+    db.addMessage(session.id, 'user', dump.content)
+    const doc = db.createDoc({ title: 'Phase6', content: '- Frust', dumpId: dump.id })
+    db.addFiling(dump.id, doc.id, 'created')
+
+    db.deleteDump(dump.id)
+
+    expect(db.getDump(dump.id)).toBeNull()
+    expect(buildFeed(db)).toHaveLength(0)
+    expect(db.listMessages(session.id)).toHaveLength(0)
+    // the filed document survives — only the history entry is gone
+    expect(db.getDoc(doc.id)?.title).toBe('Phase6')
+  })
+
+  it('renames a document without touching its content or theme', () => {
+    const theme = db.createTheme('Arbeit & Karriere')
+    const doc = db.createDoc({ title: 'Phase6', content: '- Frust', themeId: theme.id })
+    db.updateDoc(doc.id, { title: 'Frust Phase6' })
+    const after = db.getDoc(doc.id)
+    expect(after).toMatchObject({ title: 'Frust Phase6', content: '- Frust', themeName: 'Arbeit & Karriere' })
+    expect(db.searchDocs('Frust')[0].id).toBe(doc.id)
+  })
+
   it('stores todos with theme and due label', () => {
     const theme = db.createTheme('Familie')
     const todo = db.createTodo({ text: 'Zahnarzt anrufen', dueLabel: 'Fr, 16 Uhr', themeId: theme.id })
@@ -113,11 +138,22 @@ describe('feed + thread', () => {
     db.setDumpStatus(dump.id, 'failed')
     db.finishSession(session.id, null, 'Failed to spawn Claude Code process')
 
-    const thread = buildThread(db, session.id)
-    expect(thread.map((t) => t.type)).toEqual(['user', 'agent'])
-    expect(thread[1]).toMatchObject({ type: 'agent' })
-    expect((thread[1] as { text: string }).text).toContain('Failed to spawn Claude Code process')
+    const { entries, running } = buildThread(db, session.id)
+    expect(entries.map((t) => t.type)).toEqual(['user', 'agent'])
+    expect(running).toBe(false)
+    expect((entries[1] as { text: string }).text).toContain('Failed to spawn Claude Code process')
     expect(buildFeed(db)[0].status).toBe('failed')
+  })
+
+  it('reports a still-running session so the chat can show the indicator', () => {
+    const dump = db.createDump('Zahnarzt anrufen')
+    const session = db.createSession('process_dump', dump.id)
+    db.addMessage(session.id, 'user', dump.content)
+    db.setDumpStatus(dump.id, 'processing')
+
+    expect(buildThread(db, session.id).running).toBe(true)
+    db.finishSession(session.id, 'Abgelegt.', null)
+    expect(buildThread(db, session.id).running).toBe(false)
   })
 
   it('reconstructs a full thread with question, proposal and filed card', () => {
@@ -146,10 +182,9 @@ describe('feed + thread', () => {
     db.createDoc({ title: 'Hero', content: '- Zeile', dumpId: dump.id })
     db.finishSession(session.id, 'Abgelegt.', null)
 
-    const thread = buildThread(db, session.id)
-    const types = thread.map((t) => t.type)
-    expect(types).toEqual(['user', 'question', 'user', 'proposal', 'agent', 'filed'])
-    const filed = thread.at(-1)
-    expect(filed).toMatchObject({ type: 'filed', docTitle: 'Hero', docLines: ['Zeile'] })
+    const { entries, running } = buildThread(db, session.id)
+    expect(entries.map((t) => t.type)).toEqual(['user', 'question', 'user', 'proposal', 'agent', 'filed'])
+    expect(running).toBe(false)
+    expect(entries.at(-1)).toMatchObject({ type: 'filed', docTitle: 'Hero', docLines: ['Zeile'] })
   })
 })

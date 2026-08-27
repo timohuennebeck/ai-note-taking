@@ -116,7 +116,12 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactEleme
 
   const reloadThread = useCallback((): void => {
     const sid = chatSession.current
-    if (sid != null) void api.getThread(sid).then(setThread)
+    if (sid == null) return
+    void api.getThread(sid).then((t) => {
+      setThread(t.entries)
+      // the session itself is the source of truth for "Kepler is working"
+      setThreadBusy(t.running)
+    })
   }, [])
 
   useEffect(() => {
@@ -141,9 +146,7 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactEleme
         ['question', 'proposal', 'agent_text', 'filed', 'error', 'done', 'thinking'].includes(ev.type)
       ) {
         reloadThread()
-        if (ev.type === 'done' || ev.type === 'filed') setThreadBusy(false)
-        if (ev.type === 'question' || ev.type === 'proposal') setThreadBusy(false)
-        if (ev.type === 'error') setThreadBusy(false)
+        if (ev.type === 'done' || ev.type === 'error') setThreadBusy(false)
       }
       if (['filed', 'data_changed', 'done', 'question', 'proposal'].includes(ev.type)) {
         refresh()
@@ -155,23 +158,24 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactEleme
     setStack((s) => [...s, v])
     if (v.view === 'hist' && v.sessionId != null) {
       chatSession.current = v.sessionId
-      void api.getThread(v.sessionId).then(setThread)
+      void api.getThread(v.sessionId).then((t) => {
+        setThread(t.entries)
+        setThreadBusy(t.running)
+      })
     }
   }, [])
 
+  /** Escape always returns to the home screen, from any depth. */
   const back = useCallback((): void => {
     setAsk(null)
-    setStack((s) => (s.length > 1 ? s.slice(0, -1) : [{ view: 'home' }]))
+    setStack([{ view: 'home' }])
   }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
         const el = document.activeElement
-        if (el instanceof HTMLElement && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-          el.blur()
-          return
-        }
+        if (el instanceof HTMLElement) el.blur()
         back()
       }
     }

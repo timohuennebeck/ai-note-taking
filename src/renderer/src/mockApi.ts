@@ -275,6 +275,10 @@ export const mockApi: LitterApi = {
     if (item) item.status = 'processing'
     return { sessionId }
   },
+  async deleteDump(dumpId) {
+    const i = feed.findIndex((f) => f.dumpId === dumpId)
+    if (i >= 0) feed.splice(i, 1)
+  },
   async ask(_question) {
     const sessionId = nextId++
     setTimeout(() => {
@@ -344,7 +348,9 @@ export const mockApi: LitterApi = {
     return feed
   },
   async getThread(sessionId) {
-    return threads[sessionId] ?? []
+    const entries = threads[sessionId] ?? []
+    const item = feed.find((f) => f.sessionId === sessionId)
+    return { entries, running: item ? item.status === 'processing' || item.status === 'pending' : false }
   },
   async getSessionForDump(dumpId) {
     return feed.find((f) => f.dumpId === dumpId)?.sessionId ?? null

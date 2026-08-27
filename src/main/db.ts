@@ -245,6 +245,19 @@ export class LitterDb {
     return rows.map(toDump)
   }
 
+  /**
+   * Remove a dump from the history together with its agent conversations
+   * (sessions cascade to their messages). Documents and todos the dump was
+   * filed into stay — only the history entry disappears.
+   */
+  deleteDump(id: number): void {
+    const tx = this.db.transaction((dumpId: number) => {
+      this.db.prepare('DELETE FROM agent_sessions WHERE dump_id = ?').run(dumpId)
+      this.db.prepare('DELETE FROM dumps WHERE id = ?').run(dumpId)
+    })
+    tx(id)
+  }
+
   setDumpStatus(id: number, status: DumpStatus): void {
     const processed = status === 'processed' ? "datetime('now')" : 'processed_at'
     this.db
