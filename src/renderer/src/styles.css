@@ -1,0 +1,62 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--canvas);
+  --canvas: #F3F1EC; --panel: #FAF9F7; --card: #FFFFFF; --ink: #1A1917; --text2: #55524B;
+  --muted: #8D897F; --faint: #A29D93; --ghost: #B8B3A8; --hover: #F5F3EE; --hover2: #EBE8E1;
+  --active: #E9E5DD; --ring: rgba(26,25,23,0.07); --ring2: #E6E2DA; --groupbg: #F1EEE7;
+  --accent: #C0603C; --accent-ink: #FFFFFF; --tint: #FBF3EF; --sendidle: #F1EEE8;
+  --scrim: rgba(26,25,23,0.16); --avatar: #E2DDD3; --avatar-ink: #6E6A61;
+  --shadow: 0 20px 50px rgba(26,25,23,0.14); --cardshadow: 0 4px 14px rgba(26,25,23,0.05);
+  font-family: -apple-system, 'Helvetica Neue', 'Segoe UI', sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+body.dark {
+  --canvas: #191817; --panel: #201F1D; --card: #272623; --ink: #ECEAE6; --text2: #B8B4AC;
+  --muted: #8D897F; --faint: #77736A; --ghost: #605C55; --hover: #2A2926; --hover2: #262523;
+  --active: #302E2B; --ring: rgba(236,234,230,0.09); --ring2: #34322E; --groupbg: #262523;
+  --accent: #D07A55; --accent-ink: #201F1D; --tint: #33261F; --sendidle: #302E2B;
+  --scrim: rgba(0,0,0,0.45); --avatar: #3A3833; --avatar-ink: #B8B4AC;
+  --shadow: 0 20px 50px rgba(0,0,0,0.5); --cardshadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+
+* { box-sizing: border-box; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { opacity: 0.75; }
+::selection { background: rgba(192, 96, 60, 0.2); }
+*::-webkit-scrollbar { width: 0; height: 0; }
+* { scrollbar-width: none; }
+
+input, textarea { font-family: inherit; color: var(--ink); }
+input::placeholder, textarea::placeholder { color: var(--faint); }
+
+@keyframes kepler-fade {
+  0% { background-position: 130% 0; }
+  100% { background-position: -30% 0; }
+}
+
+.kepler-pending {
+  background: linear-gradient(90deg, var(--muted) 30%, var(--accent) 50%, var(--muted) 70%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: kepler-fade 1.6s linear infinite;
+}
+
+.hover-bg:hover { background: var(--hover); }
+.hover-bg2:hover { background: var(--hover2); }
+.hover-ink:hover { color: var(--ink) !important; }
+.hover-accent-ring:hover { box-shadow: 0 0 0 1.5px var(--accent) !important; }
+
+.drag { -webkit-app-region: drag; }
+.no-drag { -webkit-app-region: no-drag; }
+
+.note-highlight {
+  background: var(--tint);
+  box-shadow: 0 0 0 2px var(--tint);
+  border-radius: 3px;
+}

@@ -1,0 +1,66 @@
+{
+  "name": "litter",
+  "productName": "Litter",
+  "version": "0.1.0",
+  "description": "Brain-dump notes that file themselves. Local-first macOS app powered by the Claude Agent SDK.",
+  "main": "out/main/index.js",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "predev": "electron-rebuild -f -w better-sqlite3",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "pretest": "npm rebuild better-sqlite3",
+    "test": "vitest run",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "dist:mac": "electron-vite build && electron-builder --mac",
+    "postinstall": "electron-rebuild -f -w better-sqlite3"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.5",
+    "better-sqlite3": "^12.2.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^37.0.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vite": "^7.0.0",
+    "vitest": "^3.0.0"
+  },
+  "build": {
+    "appId": "com.litter.app",
+    "productName": "Litter",
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "**/*.node",
+      "node_modules/@anthropic-ai/claude-agent-sdk/**"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "darkModeSupport": true
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "dist"
+    }
+  }
+}
