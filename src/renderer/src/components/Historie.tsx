@@ -54,6 +54,12 @@ export function Historie(): ReactElement {
               </span>
             )}
           </div>
+          {item.status === 'processed' && item.parts.length === 0 && (
+            <span style={{ fontSize: 11.5, color: 'var(--ghost)', flex: 'none' }}>nichts abgelegt</span>
+          )}
+          {item.status === 'failed' && (
+            <span style={{ fontSize: 11.5, color: 'var(--accent)', flex: 'none' }}>fehlgeschlagen</span>
+          )}
           {item.status === 'processed' && item.parts.length > 0 && (
             <span style={{ fontSize: 11.5, color: 'var(--faint)', flex: 'none' }}>
               {item.parts.find((p) => p.kind === 'doc')?.themeName ?? 'abgelegt'}

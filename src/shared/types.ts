@@ -75,7 +75,8 @@ export interface FilingPart {
   label: string
   noteId?: number
   themeName?: string
-  isNew?: boolean
+  /** whether the dump created this document or was appended to it */
+  action?: 'created' | 'appended'
 }
 
 export interface FeedItem {

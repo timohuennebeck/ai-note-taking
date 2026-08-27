@@ -54,6 +54,22 @@ describe('LitterDb', () => {
     expect(() => db.searchDocs('was "ist" das? AND OR NOT (')).not.toThrow()
   })
 
+  it('links appended documents to the dump via filings', () => {
+    const existing = db.createDoc({ title: 'Meeting-Notiz', content: '- alter Stand' })
+    const dump = db.createDump('Heute wieder Gehaltstransparenz besprochen')
+    db.appendToDoc(existing.id, '- neuer Stand')
+    db.addFiling(dump.id, existing.id, 'appended')
+
+    const docs = db.docsForDump(dump.id)
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).toMatchObject({ id: existing.id, action: 'appended' })
+
+    const feed = buildFeed(db)
+    expect(feed[0].parts).toEqual([
+      { kind: 'doc', label: 'Meeting-Notiz', noteId: existing.id, themeName: undefined, action: 'appended' }
+    ])
+  })
+
   it('stores todos with theme and due label', () => {
     const theme = db.createTheme('Familie')
     const todo = db.createTodo({ text: 'Zahnarzt anrufen', dueLabel: 'Fr, 16 Uhr', themeId: theme.id })
@@ -84,7 +100,7 @@ describe('feed + thread', () => {
     const feed = buildFeed(db)
     expect(feed).toHaveLength(1)
     expect(feed[0].parts).toEqual([
-      { kind: 'doc', label: 'Digest-Idee', noteId: 1, themeName: 'EmaBoard' },
+      { kind: 'doc', label: 'Digest-Idee', noteId: 1, themeName: 'EmaBoard', action: 'created' },
       { kind: 'todo', label: 'Digest testen · Do' }
     ])
     expect(feed[0].pendingQuestions).toBe(1)

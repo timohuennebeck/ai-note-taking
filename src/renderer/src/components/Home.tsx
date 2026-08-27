@@ -177,10 +177,18 @@ function FeedRow({ item }: { item: FeedItem }): ReactElement {
   const [menuFor, setMenuFor] = useState<number | null>(null)
   const fresh = item.dumpId === justSentDump
   const pending = item.status === 'pending' || item.status === 'processing'
+  const docParts = item.parts.filter((p) => p.kind === 'doc')
+  const splitLabel =
+    item.parts.length > 1
+      ? 'aufgeteilt in'
+      : docParts[0]?.action === 'appended'
+        ? 'ergänzt in'
+        : 'abgelegt in'
 
   return (
     <div
       className="hover-bg"
+      onClick={() => void openChatForDump(item.dumpId)}
       style={{
         position: 'relative',
         display: 'flex',
@@ -188,21 +196,13 @@ function FeedRow({ item }: { item: FeedItem }): ReactElement {
         gap: 12,
         padding: 10,
         borderRadius: 9,
-        ...(fresh ? { background: 'var(--tint)' } : {})
+        cursor: 'pointer'
       }}
     >
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span
-          onClick={() => void openChatForDump(item.dumpId)}
-          style={{ fontSize: 13, lineHeight: 1.5, cursor: 'pointer' }}
-        >
-          {item.text}
-        </span>
+        <span style={{ fontSize: 13, lineHeight: 1.5 }}>{item.text}</span>
         {pending ? (
-          <span
-            onClick={() => void openChatForDump(item.dumpId)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-          >
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {item.pendingQuestions > 0 ? (
               <>
                 <span
@@ -245,25 +245,23 @@ function FeedRow({ item }: { item: FeedItem }): ReactElement {
             >
               Ablage fehlgeschlagen — erneut versuchen
             </span>
-            <span
-              onClick={() => void openChatForDump(item.dumpId)}
-              style={{ fontSize: 11.5, color: 'var(--faint)', cursor: 'pointer' }}
-            >
-              Details
-            </span>
+            <span style={{ fontSize: 11.5, color: 'var(--faint)' }}>antippen für Details</span>
           </span>
+        ) : item.parts.length === 0 ? (
+          <span style={{ fontSize: 11.5, color: 'var(--ghost)' }}>nichts abgelegt</span>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11.5, color: 'var(--ghost)', flex: 'none' }}>
-              {item.parts.length > 1 ? 'aufgeteilt in' : 'abgelegt in'}
-            </span>
+            <span style={{ fontSize: 11.5, color: 'var(--ghost)', flex: 'none' }}>{splitLabel}</span>
             {item.parts.map((p, pi) => (
               <span key={pi} style={{ display: 'flex', alignItems: 'center', gap: 5, flex: 'none' }}>
                 {p.kind === 'doc' ? (
                   <>
                     <span
                       className="hover-bg2"
-                      onClick={() => p.noteId != null && go({ view: 'note', noteId: p.noteId })}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (p.noteId != null) go({ view: 'note', noteId: p.noteId })
+                      }}
                       style={{ ...chipCore, cursor: 'pointer' }}
                     >
                       <DocGlyph />
@@ -311,7 +309,7 @@ function FeedRow({ item }: { item: FeedItem }): ReactElement {
                     )}
                   </>
                 ) : (
-                  <span style={{ ...chipCore, cursor: 'default' }}>
+                  <span onClick={(e) => e.stopPropagation()} style={{ ...chipCore, cursor: 'default' }}>
                     <span
                       style={{
                         width: 11,

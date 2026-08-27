@@ -144,6 +144,7 @@ export function buildKeplerTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
       async ({ title, markdown, theme_name }) => {
         const themeId = themeIdFor(ctx, theme_name, true)
         const d = ctx.db.createDoc({ title, content: markdown, themeId, dumpId: ctx.dumpId })
+        if (ctx.dumpId != null) ctx.db.addFiling(ctx.dumpId, d.id, 'created')
         changed()
         return text(`Dokument "${d.title}" angelegt (id ${d.id}, Thema: ${theme_name}).`)
       }
@@ -157,6 +158,7 @@ export function buildKeplerTools(ctx: SessionCtx): Array<SdkMcpToolDefinition<an
         const d = ctx.db.getDoc(document_id)
         if (!d) return errText(`Dokument ${document_id} existiert nicht.`)
         ctx.db.appendToDoc(document_id, markdown)
+        if (ctx.dumpId != null) ctx.db.addFiling(ctx.dumpId, document_id, 'appended')
         changed()
         return text(`Dokument "${d.title}" ergänzt.`)
       }

@@ -172,7 +172,7 @@ const feed: FeedItem[] = [
     text: 'Idee: wöchentliche Zusammenfassung aller Dumps, automatisch am Sonntagabend.',
     status: 'processed',
     pendingQuestions: 0,
-    parts: [{ kind: 'doc', label: 'Wochen-Digest', noteId: 4, themeName: 'EmaBoard', isNew: true }]
+    parts: [{ kind: 'doc', label: 'Wochen-Digest', noteId: 4, themeName: 'EmaBoard', action: 'created' }]
   },
   {
     dumpId: 5,

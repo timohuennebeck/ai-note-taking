@@ -56,6 +56,15 @@ CREATE TABLE IF NOT EXISTS todos (
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS filings (
+  id            INTEGER PRIMARY KEY,
+  dump_id       INTEGER NOT NULL REFERENCES dumps(id) ON DELETE CASCADE,
+  note_id       INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+  action        TEXT NOT NULL DEFAULT 'created' CHECK (action IN ('created', 'appended')),
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_filings_dump ON filings(dump_id);
+
 CREATE TABLE IF NOT EXISTS agent_sessions (
   id             INTEGER PRIMARY KEY,
   dump_id        INTEGER REFERENCES dumps(id) ON DELETE SET NULL,
@@ -430,14 +439,31 @@ export class LitterDb {
     return rows.map(toTodo)
   }
 
-  docsForDump(dumpId: number): Doc[] {
+  /** Record that a dump was filed into a note (created or appended). */
+  addFiling(dumpId: number, noteId: number, action: 'created' | 'appended'): void {
+    this.db
+      .prepare('INSERT INTO filings (dump_id, note_id, action) VALUES (?, ?, ?)')
+      .run(dumpId, noteId, action)
+  }
+
+  /** Every document this dump was filed into: created from it OR appended to. */
+  docsForDump(dumpId: number): Array<Doc & { action: 'created' | 'appended' }> {
     const rows = this.db
       .prepare(
-        `SELECT n.*, t.name AS theme_name FROM notes n
-         LEFT JOIN themes t ON t.id = n.theme_id WHERE n.dump_id = ? ORDER BY n.position, n.id`
+        `SELECT n.*, t.name AS theme_name,
+                COALESCE(
+                  (SELECT f.action FROM filings f
+                   WHERE f.dump_id = @id AND f.note_id = n.id ORDER BY f.id LIMIT 1),
+                  'created'
+                ) AS action
+         FROM notes n
+         LEFT JOIN themes t ON t.id = n.theme_id
+         WHERE n.dump_id = @id
+            OR n.id IN (SELECT note_id FROM filings WHERE dump_id = @id)
+         ORDER BY n.position, n.id`
       )
-      .all(dumpId) as NoteRow[]
-    return rows.map(toDoc)
+      .all({ id: dumpId }) as Array<NoteRow & { action: 'created' | 'appended' }>
+    return rows.map((r) => ({ ...toDoc(r), action: r.action }))
   }
 
   /* ---------- agent sessions / messages ---------- */

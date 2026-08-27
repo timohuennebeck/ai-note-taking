@@ -13,7 +13,8 @@ export function buildFeed(db: LitterDb, limit = 30): FeedItem[] {
         kind: 'doc' as const,
         label: d.title,
         noteId: d.id,
-        themeName: d.themeName ?? undefined
+        themeName: d.themeName ?? undefined,
+        action: d.action
       })),
       ...todos.map((t) => ({
         kind: 'todo' as const,
